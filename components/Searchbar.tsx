@@ -1,21 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import {
-    CheckIcon,
-    MagnifyingGlassIcon,
-    Cross2Icon,
-} from "@radix-ui/react-icons";
-import { useFormState } from "react-dom";
+import { MagnifyingGlassIcon, Cross2Icon } from "@radix-ui/react-icons";
 
 export function Searchbar() {
-    const [searchQuery, setSearchQuery] = useState("");
-
     const [allTags, setAllTags] = useState({
         reviewer: ["reviewer 1", "reviewer 2", "reviewer 3"] as string[],
         type: ["novelty", "grammar & style", "technical accuracy"] as string[],
@@ -31,6 +24,10 @@ export function Searchbar() {
         type: [] as string[],
         status: [] as string[],
     });
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [inputFocused, setInputFocused] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const tagCategoryColors = {
         reviewer: "text-red-600" as string,
@@ -99,18 +96,49 @@ export function Searchbar() {
         setSuggestedTags(filteredTags);
     };
 
+    const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+        if (
+            dropdownRef.current &&
+            dropdownRef.current.contains(event.relatedTarget)
+        ) {
+            return;
+        }
+        setInputFocused(false);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setInputFocused(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
         <>
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
                 <Input
                     type="text"
                     placeholder="Filter tags..."
                     value={searchQuery}
                     onChange={handleSearch}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={handleInputBlur}
                     className="pr-10"
                 />
-                {
-                    <div className="absolute top-full left-0 w-full bg-background border rounded-md shadow-lg z-10 mt-1">
+                {inputFocused && (
+                    <div
+                        onMouseDown={(e) => e.preventDefault()}
+                        className="absolute top-full left-0 w-full bg-background border rounded-md shadow-lg z-10 mt-1"
+                    >
                         <ul className="p-4 text-sm">
                             {Object.entries(suggestedTags).map(
                                 ([tagCategory, tags]) => (
@@ -159,7 +187,7 @@ export function Searchbar() {
                             )}
                         </ul>
                     </div>
-                }
+                )}
                 <Button
                     type="button"
                     size="icon"
