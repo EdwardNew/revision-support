@@ -38,20 +38,38 @@ type Review = {
     content: object;
 };
 
+type Issue = {
+    title: string;
+    tags: {
+        reviewer: string;
+        type: string;
+        status: string;
+    };
+};
+
 export default function Page() {
     const [highlights, setHighlights] = useState<Array<IHighlight>>([]);
 
     const [reviews, setReviews] = useState<Array<Review>>([]);
-    const [data, setData] = useState();
+    const [issues, setIssues] = useState<Array<Issue>>([]);
 
-    const getData = useEffect(() => {
+    useEffect(() => {
         fetch("http://localhost:8000/papers")
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
-                setData(data);
                 setReviews(data[0].reviews);
+            });
+    }, []);
+
+    useEffect(() => {
+        fetch("http://localhost:8000/issues")
+            .then((res) => {
+                return res.json();
+            })
+            .then((data) => {
+                setIssues(data);
             });
     }, []);
 
@@ -165,57 +183,33 @@ export default function Page() {
                             </div>
                         </div>
                         <div className="grid gap-4 p-6">
-                            <Card>
-                                <CardContent>
-                                    <h3 className="text-lg font-medium">
-                                        Lacks Clarity
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground"></p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Badge variant="outline">
-                                            Addition
-                                        </Badge>
-                                        <Badge variant="outline">
-                                            Clarification
-                                        </Badge>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="text-xs text-muted-foreground">
-                                    Reviewed by John Doe on 2023-07-01
-                                </CardFooter>
-                            </Card>
-                            <Card>
-                                <CardContent>
-                                    <h3 className="text-lg font-medium">
-                                        Novel?
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground"></p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Badge variant="outline">
-                                            Significance & Impact
-                                        </Badge>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="text-xs text-muted-foreground">
-                                    Reviewed by Jane Smith on 2023-06-15
-                                </CardFooter>
-                            </Card>
-                            <Card>
-                                <CardContent>
-                                    <h3 className="text-lg font-medium">
-                                        Needs more data
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground"></p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Badge variant="outline">
-                                            Addition
-                                        </Badge>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="text-xs text-muted-foreground">
-                                    Reviewed by Michael Johnson on 2023-05-20
-                                </CardFooter>
-                            </Card>
+                            {issues &&
+                                issues.map((issue) => (
+                                    <Card key={issue.title}>
+                                        <CardContent>
+                                            <h3 className="text-lg font-medium">
+                                                {issue.title}
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground"></p>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                {Object.entries(issue.tags).map(
+                                                    ([tagCategory, tag]) => (
+                                                        <Badge
+                                                            key={`${issue.title}-${tag}-tag`}
+                                                            variant="outline"
+                                                        >
+                                                            {tag}
+                                                        </Badge>
+                                                    )
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                        <CardFooter className="text-xs text-muted-foreground">
+                                            Last Edited by John Doe on
+                                            2023-07-01
+                                        </CardFooter>
+                                    </Card>
+                                ))}
                         </div>
                     </div>
                 </ResizablePanel>

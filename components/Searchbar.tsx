@@ -124,7 +124,7 @@ export function Searchbar() {
 
     return (
         <>
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative mt-6" ref={dropdownRef}>
                 <Input
                     type="text"
                     placeholder="Filter tags..."
@@ -151,7 +151,7 @@ export function Searchbar() {
                                         </span>
                                         {tags.map((tag) => (
                                             <span
-                                                key={tag}
+                                                key={`${tag}-checkbox`}
                                                 className="flex flex-row items-center"
                                             >
                                                 <Checkbox
@@ -202,7 +202,7 @@ export function Searchbar() {
                     {Object.entries(selectedTags).map(([tagCategory, tags]) =>
                         tags.map((tag) => (
                             <Badge
-                                key={tag}
+                                key={`${tag}-badge`}
                                 variant="outline"
                                 className={`${
                                     tagCategoryColors[

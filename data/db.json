@@ -2,7 +2,6 @@
     "papers": [
         {
             "paper_id": "1234",
-            "tags": [],
             "reviews": [
                 {
                     "reviewer": "1",
@@ -61,6 +60,41 @@
                     }
                 }
             ]
+        }
+    ],
+
+    "issues": [
+        {
+            "title": "Lacks Clarity",
+            "tags": {
+                "reviewer": "reviewer 1",
+                "type": "technical accuracy",
+                "status": "in progress"
+            }
+        },
+        {
+            "title": "Lacks Novelty",
+            "tags": {
+                "reviewer": "reviewer 2",
+                "type": "novelty",
+                "status": "in progress"
+            }
+        },
+        {
+            "title": "Typo in Section 4",
+            "tags": {
+                "reviewer": "reviewer 3",
+                "type": "grammar & style",
+                "status": "not started"
+            }
+        },
+        {
+            "title": "Problematic Assumption",
+            "tags": {
+                "reviewer": "reviewer 2",
+                "type": "technical accuracy",
+                "status": "done"
+            }
         }
     ]
 }
