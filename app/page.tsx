@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Pdf } from "@/components/pdf/Pdf";
 import { Sidebar } from "@/components/pdf/Sidebar";
 import { Searchbar } from "@/components/Searchbar";
+import { ReviewHighlight } from "@/components/ReviewHighlight";
 
 import type { IHighlight } from "react-pdf-highlighter";
 
@@ -56,16 +57,8 @@ export type Tags = {
 export default function Page() {
     const [highlights, setHighlights] = useState<Array<IHighlight>>([]);
 
+    // get and store peer review data
     const [reviews, setReviews] = useState<Array<Review>>([]);
-
-    const [selectedTags, setSelectedTags] = useState<Tags>({
-        reviewer: [],
-        type: [],
-        status: [],
-    });
-
-    const [allIssues, setAllIssues] = useState<Array<Issue>>([]);
-    const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
 
     useEffect(() => {
         fetch("http://localhost:8000/papers")
@@ -77,6 +70,16 @@ export default function Page() {
             });
     }, []);
 
+    // get and store issues; filter issues by selected tag filters
+    const [selectedTags, setSelectedTags] = useState<Tags>({
+        reviewer: [],
+        type: [],
+        status: [],
+    });
+
+    const [allIssues, setAllIssues] = useState<Array<Issue>>([]);
+    const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
+
     useEffect(() => {
         fetch("http://localhost:8000/issues")
             .then((res) => {
@@ -87,16 +90,16 @@ export default function Page() {
             });
     }, []);
 
-    useEffect(() => {
-        console.log(allIssues);
-    }, [allIssues]);
+    // useEffect(() => {
+    //     console.log(allIssues);
+    // }, [allIssues]);
+
+    // useEffect(() => {
+    //     console.log("filtered issues: ", filteredIssues);
+    // }, [filteredIssues]);
 
     useEffect(() => {
-        console.log("filtered issues: ", filteredIssues);
-    }, [filteredIssues]);
-
-    useEffect(() => {
-        console.log("selectedTags:", selectedTags);
+        // console.log("selectedTags:", selectedTags);
 
         const allSelectedTags = Object.values(selectedTags).flat();
         if (allSelectedTags.length === 0) {
@@ -110,6 +113,8 @@ export default function Page() {
             setFilteredIssues(filteredIssues);
         }
     }, [selectedTags, allIssues]);
+
+    // handle review highlights
 
     return (
         <div className="flex h-screen">
@@ -145,6 +150,7 @@ export default function Page() {
                             Reviews
                         </div>
                         <div className="flex-1 p-4 overflow-auto">
+                            <ReviewHighlight />
                             {reviews.length > 0 &&
                                 reviews.map((review) => {
                                     return (
