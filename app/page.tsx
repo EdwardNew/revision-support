@@ -47,11 +47,25 @@ type Issue = {
     };
 };
 
+export type Tags = {
+    reviewer: string[];
+    type: string[];
+    status: string[];
+};
+
 export default function Page() {
     const [highlights, setHighlights] = useState<Array<IHighlight>>([]);
 
     const [reviews, setReviews] = useState<Array<Review>>([]);
-    const [issues, setIssues] = useState<Array<Issue>>([]);
+
+    const [selectedTags, setSelectedTags] = useState<Tags>({
+        reviewer: [],
+        type: [],
+        status: [],
+    });
+
+    const [allIssues, setAllIssues] = useState<Array<Issue>>([]);
+    const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
 
     useEffect(() => {
         fetch("http://localhost:8000/papers")
@@ -69,9 +83,33 @@ export default function Page() {
                 return res.json();
             })
             .then((data) => {
-                setIssues(data);
+                setAllIssues(data);
             });
     }, []);
+
+    useEffect(() => {
+        console.log(allIssues);
+    }, [allIssues]);
+
+    useEffect(() => {
+        console.log("filtered issues: ", filteredIssues);
+    }, [filteredIssues]);
+
+    useEffect(() => {
+        console.log("selectedTags:", selectedTags);
+
+        const allSelectedTags = Object.values(selectedTags).flat();
+        if (allSelectedTags.length === 0) {
+            setFilteredIssues(allIssues);
+        } else {
+            const filteredIssues = allIssues.filter((issue) =>
+                Object.values(issue.tags).some((tag) =>
+                    allSelectedTags.includes(tag)
+                )
+            );
+            setFilteredIssues(filteredIssues);
+        }
+    }, [selectedTags, allIssues]);
 
     return (
         <div className="flex h-screen">
@@ -115,48 +153,43 @@ export default function Page() {
                                             className="p-4 mx-2 my-6"
                                         >
                                             {Object.entries(review.content).map(
-                                                ([key, value]) => {
+                                                ([section, content]) => {
                                                     return (
                                                         <div
-                                                            key={key}
+                                                            key={`${review.reviewer}-${section}`}
                                                             className="text-sm"
                                                         >
                                                             <p className="text-red-800 font-bold mt-1.5 mb-0.5">
-                                                                {key}
+                                                                {section}
                                                             </p>
-                                                            <p>
-                                                                {JSON.stringify(
-                                                                    value
+                                                            {JSON.stringify(
+                                                                content
+                                                            )
+                                                                .replaceAll(
+                                                                    '\\"',
+                                                                    '"'
                                                                 )
-                                                                    .replaceAll(
-                                                                        '\\"',
-                                                                        '"'
-                                                                    )
-                                                                    .replaceAll(
-                                                                        '"',
-                                                                        ""
-                                                                    )
-                                                                    .split(
-                                                                        "\\n"
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            line
-                                                                        ) => {
-                                                                            return (
-                                                                                <p
-                                                                                    key={
-                                                                                        line
-                                                                                    }
-                                                                                >
-                                                                                    {
-                                                                                        line
-                                                                                    }
-                                                                                </p>
-                                                                            );
-                                                                        }
-                                                                    )}
-                                                            </p>
+                                                                .replaceAll(
+                                                                    '"',
+                                                                    ""
+                                                                )
+                                                                .split("\\n")
+                                                                .map(
+                                                                    (
+                                                                        line,
+                                                                        index
+                                                                    ) => {
+                                                                        return (
+                                                                            <p
+                                                                                key={`${review.reviewer}-${section}-${index}`}
+                                                                            >
+                                                                                {
+                                                                                    line
+                                                                                }
+                                                                            </p>
+                                                                        );
+                                                                    }
+                                                                )}
                                                         </div>
                                                     );
                                                 }
@@ -179,12 +212,15 @@ export default function Page() {
                         </div>
                         <div className="flex items-center justify-between mb-4 ps-6">
                             <div className="flex items-center gap-2">
-                                <Searchbar />
+                                <Searchbar
+                                    selectedTags={selectedTags}
+                                    setSelectedTags={setSelectedTags}
+                                />
                             </div>
                         </div>
                         <div className="grid gap-4 p-6">
-                            {issues &&
-                                issues.map((issue) => (
+                            {filteredIssues &&
+                                filteredIssues.map((issue) => (
                                     <Card key={issue.title}>
                                         <CardContent>
                                             <h3 className="text-lg font-medium">

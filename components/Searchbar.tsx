@@ -8,7 +8,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { MagnifyingGlassIcon, Cross2Icon } from "@radix-ui/react-icons";
 
-export function Searchbar() {
+import type { Tags } from "@/app/page";
+
+const tagCategoryColors = {
+    reviewer: "text-red-600" as string,
+    type: "text-green-600" as string,
+    status: "text-blue-600" as string,
+};
+
+type SearchbarProps = {
+    selectedTags: Tags;
+    setSelectedTags: React.Dispatch<React.SetStateAction<Tags>>;
+};
+
+export function Searchbar({ selectedTags, setSelectedTags }: SearchbarProps) {
     const [allTags, setAllTags] = useState({
         reviewer: ["reviewer 1", "reviewer 2", "reviewer 3"] as string[],
         type: ["novelty", "grammar & style", "technical accuracy"] as string[],
@@ -19,24 +32,12 @@ export function Searchbar() {
         allTags as Partial<typeof allTags>
     );
 
-    const [selectedTags, setSelectedTags] = useState({
-        reviewer: [] as string[],
-        type: [] as string[],
-        status: [] as string[],
-    });
-
     const [searchQuery, setSearchQuery] = useState("");
     const [inputFocused, setInputFocused] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const tagCategoryColors = {
-        reviewer: "text-red-600" as string,
-        type: "text-green-600" as string,
-        status: "text-blue-600" as string,
-    };
-
     const isChecked = (tagCategory: keyof typeof selectedTags, tag: string) => {
-        console.log("isChecked?", selectedTags[tagCategory].includes(tag));
+        // console.log("isChecked?", selectedTags[tagCategory].includes(tag));
         return selectedTags[tagCategory].includes(tag);
     };
 
@@ -67,14 +68,14 @@ export function Searchbar() {
         tagCategory: keyof typeof selectedTags,
         tag: string
     ) => {
-        console.log(isChecked, selectedTags);
+        // console.log(isChecked, selectedTags);
         isChecked
             ? handleTagSelect(tagCategory, tag)
             : handleTagRemove(tagCategory, tag);
     };
 
     const handleSearch = (e: any) => {
-        console.log("changed!");
+        // console.log("changed!");
 
         setSearchQuery(e.target.value);
 
