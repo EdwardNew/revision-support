@@ -75,8 +75,6 @@ export function Searchbar({ selectedTags, setSelectedTags }: SearchbarProps) {
     };
 
     const handleSearch = (e: any) => {
-        // console.log("changed!");
-
         setSearchQuery(e.target.value);
 
         let filteredTags: Partial<typeof allTags> = {};

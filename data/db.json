@@ -70,7 +70,36 @@
                 "reviewer": "reviewer 1",
                 "type": "technical accuracy",
                 "status": "in progress"
-            }
+            },
+            "highlight": {
+                "text": "summary_of_the_paper",
+                "rects": [
+                    { "x": 42, "y": 113, "height": 17, "width": 160.09375 }
+                ],
+                "initialScrollPosition": 0
+            },
+            "discussion": [
+                {
+                    "content": "I received feedback that my paper lacks clarity. Any tips on how to improve this?",
+                    "author": "AuthorA",
+                    "timestamp": "2024-08-05T09:00:00Z"
+                },
+                {
+                    "content": "You might want to try breaking down complex ideas into simpler parts and using more examples to illustrate your points.",
+                    "author": "AuthorB",
+                    "timestamp": "2024-08-05T09:05:00Z"
+                },
+                {
+                    "content": "Also, make sure your introduction clearly outlines the structure of the paper so readers know what to expect.",
+                    "author": "AuthorC",
+                    "timestamp": "2024-08-05T09:10:00Z"
+                },
+                {
+                    "content": "Thanks! I'll revise the introduction and add more examples to the main sections.",
+                    "author": "AuthorA",
+                    "timestamp": "2024-08-05T09:15:00Z"
+                }
+            ]
         },
         {
             "title": "Lacks Novelty",
@@ -78,7 +107,42 @@
                 "reviewer": "reviewer 2",
                 "type": "novelty",
                 "status": "in progress"
-            }
+            },
+            "highlight": {
+                "text": " 5 will make the contributions more clear.- In additi",
+                "rects": [
+                    {
+                        "x": 91.765625,
+                        "y": 443,
+                        "height": 17,
+                        "width": 270.953125
+                    },
+                    { "x": 42, "y": 463, "height": 17, "width": 62.71875 }
+                ],
+                "initialScrollPosition": 0
+            },
+            "discussion": [
+                {
+                    "content": "My paper was criticized for lacking novelty. How can I address this?",
+                    "author": "AuthorB",
+                    "timestamp": "2024-08-05T10:00:00Z"
+                },
+                {
+                    "content": "You might need to highlight more clearly what is new about your approach compared to previous work.",
+                    "author": "AuthorD",
+                    "timestamp": "2024-08-05T10:05:00Z"
+                },
+                {
+                    "content": "Consider adding a section that specifically discusses the contributions and novelty of your research.",
+                    "author": "AuthorE",
+                    "timestamp": "2024-08-05T10:10:00Z"
+                },
+                {
+                    "content": "Good idea, I'll add a contributions section and compare my results with existing studies more explicitly.",
+                    "author": "AuthorB",
+                    "timestamp": "2024-08-05T10:15:00Z"
+                }
+            ]
         },
         {
             "title": "Typo in Section 4",
@@ -86,7 +150,42 @@
                 "reviewer": "reviewer 3",
                 "type": "grammar & style",
                 "status": "not started"
-            }
+            },
+            "highlight": {
+                "text": "or do we have more noisy-labelled samples (as explained in 1st paragraph of Section 4.1)?",
+                "rects": [
+                    {
+                        "x": 63.75,
+                        "y": 643,
+                        "height": 17,
+                        "width": 505.78125
+                    },
+                    { "x": 42, "y": 663, "height": 17, "width": 83.078125 }
+                ],
+                "initialScrollPosition": 0
+            },
+            "discussion": [
+                {
+                    "content": "A reviewer pointed out a typo in section 4. What's the best way to handle this?",
+                    "author": "AuthorC",
+                    "timestamp": "2024-08-05T11:00:00Z"
+                },
+                {
+                    "content": "Just correct the typo and make a note of it in your response to the reviewer. It's a minor issue.",
+                    "author": "AuthorF",
+                    "timestamp": "2024-08-05T11:05:00Z"
+                },
+                {
+                    "content": "Double-check the entire section for any other potential errors while you're at it.",
+                    "author": "AuthorG",
+                    "timestamp": "2024-08-05T11:10:00Z"
+                },
+                {
+                    "content": "Will do. I'll correct the typo and ensure the rest of the section is error-free.",
+                    "author": "AuthorC",
+                    "timestamp": "2024-08-05T11:15:00Z"
+                }
+            ]
         },
         {
             "title": "Problematic Assumption",
@@ -94,7 +193,41 @@
                 "reviewer": "reviewer 2",
                 "type": "technical accuracy",
                 "status": "done"
-            }
+            },
+            "highlight": {
+                "text": "Figures 2 to 4?",
+                "rects": [
+                    {
+                        "x": 359.96875,
+                        "y": 683,
+                        "height": 17,
+                        "width": 98.515625
+                    }
+                ],
+                "initialScrollPosition": 0
+            },
+            "discussion": [
+                {
+                    "content": "One of the reviewers mentioned that there's a problematic assumption in my model. How should I address this?",
+                    "author": "AuthorD",
+                    "timestamp": "2024-08-05T12:00:00Z"
+                },
+                {
+                    "content": "First, identify exactly what the assumption is and why it's problematic. Then, see if you can either justify it better or modify your model to avoid the assumption.",
+                    "author": "AuthorH",
+                    "timestamp": "2024-08-05T12:05:00Z"
+                },
+                {
+                    "content": "If the assumption is unavoidable, clearly state its limitations and how they might affect the results.",
+                    "author": "AuthorI",
+                    "timestamp": "2024-08-05T12:10:00Z"
+                },
+                {
+                    "content": "Great advice. I'll review the assumption and decide whether to justify it more clearly or adjust my model.",
+                    "author": "AuthorD",
+                    "timestamp": "2024-08-05T12:15:00Z"
+                }
+            ]
         }
     ]
 }
