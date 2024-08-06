@@ -143,35 +143,9 @@ export default function Page() {
     const [position, setPosition] = useState<Record<string, number>>();
     const [selection, setSelection] = useState<Selection>();
     const scrollContainer = useRef<HTMLElement | null>(null);
-    const [reviewsScrollPosition, setReviewsScrollPosition] =
-        useState<number>(0);
 
     useEffect(() => {
         scrollContainer.current = document.getElementById("scroll-container");
-        // console.log(scrollContainer.current?.scrollTop);
-        console.log(scrollContainer.current?.getBoundingClientRect());
-
-        const handleScroll = () => {
-            if (scrollContainer.current) {
-                // console.log(
-                //     "Scroll position:",
-                //     scrollContainer.current.scrollTop
-                // );
-                setReviewsScrollPosition(scrollContainer.current.scrollTop);
-            }
-        };
-
-        const container = scrollContainer.current;
-        if (container) {
-            container.addEventListener("scroll", handleScroll);
-        }
-
-        // Clean up the event listener on component unmount
-        return () => {
-            if (container) {
-                container.removeEventListener("scroll", handleScroll);
-            }
-        };
     }, []);
 
     function onSelectStart() {
@@ -194,7 +168,7 @@ export default function Page() {
 
         setPosition({
             x: rect.left + rect.width / 2 - 80 / 2,
-            y: rect.top + window.scrollY - 30,
+            y: rect.top - 80 + scrollContainer.current?.scrollTop,
             width: rect.width,
             height: rect.height,
         });
@@ -225,8 +199,15 @@ export default function Page() {
             highlight: {
                 text: text,
                 rects: rects,
-                initialScrollPosition: reviewsScrollPosition,
+                initialScrollPosition: scrollContainer.current?.scrollTop,
             },
+            discussion: [
+                {
+                    content: "[Placeholder text]",
+                    author: "TestAuthor",
+                    timestamp: new Date().toISOString().slice(0, -5) + "Z",
+                },
+            ],
         };
 
         setAllIssues((prevIssues) => [...prevIssues, newIssue]);
@@ -285,7 +266,8 @@ export default function Page() {
     }
 
     useEffect(() => {
-        console.log(currentIssue);
+        // console.log(currentIssue);
+        console.log(scrollContainer.current?.getBoundingClientRect().top);
         if (!currentIssue) {
             return;
         }
@@ -327,20 +309,22 @@ export default function Page() {
                         </div>
                         <div
                             id="scroll-container"
-                            className="flex-1 p-4 overflow-auto selection:bg-yellow-200"
+                            className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
                         >
+                            <div
+                                id="test"
+                                className={`w-4 h-2 absolute top-[64px] left-[84px]`}
+                            ></div>
                             {filteredIssues &&
                                 filteredIssues.map((issue) =>
                                     issue.highlight.rects.map((rect) => (
                                         <ReviewHighlight
                                             key={`${rect.x}-x-${rect.y}-y`}
                                             rect={rect}
+                                            scrollContainer={scrollContainer}
                                             initialScrollPosition={
                                                 issue.highlight
                                                     .initialScrollPosition
-                                            }
-                                            reviewsScrollPosition={
-                                                reviewsScrollPosition
                                             }
                                             issue={issue}
                                             onClick={(issue) =>
@@ -519,38 +503,6 @@ export default function Page() {
                                         ))}
                                 </>
                             )}
-                            {/* {filteredIssues &&
-                                filteredIssues.map((issue) => (
-                                    <Card
-                                        key={issue.title}
-                                        onClick={() => {
-                                            setCurrentIssue(issue);
-                                        }}
-                                    >
-                                        <CardContent>
-                                            <h3 className="text-lg font-medium">
-                                                {issue.title}
-                                            </h3>
-                                            <p className="text-sm text-muted-foreground"></p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                {Object.entries(issue.tags).map(
-                                                    ([tagCategory, tag]) => (
-                                                        <Badge
-                                                            key={`${issue.title}-${tag}-tag`}
-                                                            variant="outline"
-                                                        >
-                                                            {tag}
-                                                        </Badge>
-                                                    )
-                                                )}
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="text-xs text-muted-foreground">
-                                            Last Edited by John Doe on
-                                            2023-07-01
-                                        </CardFooter>
-                                    </Card>
-                                ))} */}
                         </div>
                     </div>
                 </ResizablePanel>
