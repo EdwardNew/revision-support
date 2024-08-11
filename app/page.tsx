@@ -6,26 +6,10 @@ import {
     ResizablePanel,
     ResizableHandle,
 } from "@/components/ui/resizable";
-
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
@@ -36,9 +20,12 @@ import { Pdf } from "@/components/pdf/Pdf";
 import { Sidebar } from "@/components/pdf/Sidebar";
 import { Searchbar } from "@/components/Searchbar";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
-import { ReviewHighlightTooltip } from "@/components/ReviewHighlightToolTip";
+import { ReviewHighlightTooltip } from "@/components/ReviewHighlightTooltip";
 import { DiscussionSection } from "@/components/DiscussionSection";
 import { DiscussionCard } from "@/components/DisucssionCard";
+import { DiscussionTextarea } from "@/components/DiscussionTextarea";
+import { Review } from "@/components/Review";
+import { IssueCard } from "@/components/IssueCard";
 
 import type { IHighlight } from "react-pdf-highlighter";
 
@@ -66,10 +53,16 @@ export type Issue = {
         rects: Rect[];
         initialScrollPosition: number;
     };
-    discussion: discussionComment[];
+    discussion: DiscussionComment[];
 };
 
-export type discussionComment = {
+export type Tags = {
+    reviewer: string[];
+    type: string[];
+    status: string[];
+};
+
+export type DiscussionComment = {
     content: string;
     author: string;
     timestamp: string;
@@ -80,12 +73,6 @@ export type Rect = {
     y: number;
     height: number;
     width: number;
-};
-
-export type Tags = {
-    reviewer: string[];
-    type: string[];
-    status: string[];
 };
 
 export default function Page() {
@@ -168,7 +155,7 @@ export default function Page() {
 
         setPosition({
             x: rect.left + rect.width / 2 - 80 / 2,
-            y: rect.top - 80 + scrollContainer.current?.scrollTop,
+            y: rect.top - 80 + (scrollContainer.current?.scrollTop ?? 0),
             width: rect.width,
             height: rect.height,
         });
@@ -178,6 +165,7 @@ export default function Page() {
         if (!selection) {
             return;
         }
+        console.log(selection.getRangeAt(0));
         console.log(selection.getRangeAt(0).getClientRects());
 
         const comment = prompt("Enter a comment for this highlight:");
@@ -185,7 +173,7 @@ export default function Page() {
 
         const selectedRange = selection.getRangeAt(0);
         const text = selectedRange.toString();
-        const rects = [...selectedRange.getClientRects()];
+        const rects = Array.from(selectedRange.getClientRects());
         console.log(selectedRange.getClientRects());
         console.log(rects);
 
@@ -199,7 +187,7 @@ export default function Page() {
             highlight: {
                 text: text,
                 rects: rects,
-                initialScrollPosition: scrollContainer.current?.scrollTop,
+                initialScrollPosition: scrollContainer.current?.scrollTop ?? 0,
             },
             discussion: [
                 {
@@ -237,32 +225,11 @@ export default function Page() {
     // discussion panel
     const [currentIssue, setCurrentIssue] = useState<Issue | null>(null);
     const [currentComments, setCurrentComments] = useState<
-        Array<discussionComment>
+        Array<DiscussionComment>
     >([]);
-    const [newCommentContent, setNewCommentContent] = useState<string>("");
 
     function updateCurrentIssue(issue: Issue) {
         setCurrentIssue(issue);
-    }
-
-    function submitComment(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-
-        const newComment = {
-            content: newCommentContent,
-            author: "NewCommentAuthor",
-            timestamp: new Date().toISOString().slice(0, -5) + "Z",
-        };
-
-        setCurrentComments((prevIssues) => [...prevIssues, newComment]);
-
-        setNewCommentContent("");
-    }
-    function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-        if (e.ctrlKey && e.key === "Enter") {
-            e.preventDefault();
-            submitComment(e);
-        }
     }
 
     useEffect(() => {
@@ -311,10 +278,6 @@ export default function Page() {
                             id="scroll-container"
                             className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
                         >
-                            <div
-                                id="test"
-                                className={`w-4 h-2 absolute top-[64px] left-[84px]`}
-                            ></div>
                             {filteredIssues &&
                                 filteredIssues.map((issue) =>
                                     issue.highlight.rects.map((rect) => (
@@ -342,53 +305,11 @@ export default function Page() {
                             {reviews.length > 0 &&
                                 reviews.map((review) => {
                                     return (
-                                        <Card
+                                        <Review
                                             key={review.reviewer}
-                                            className="p-4 mx-2 my-6"
-                                        >
-                                            {Object.entries(review.content).map(
-                                                ([section, content]) => {
-                                                    return (
-                                                        <div
-                                                            key={`${review.reviewer}-${section}`}
-                                                            className="text-sm"
-                                                        >
-                                                            <p className="text-red-800 font-bold mt-1.5 mb-0.5">
-                                                                {section}
-                                                            </p>
-                                                            {JSON.stringify(
-                                                                content
-                                                            )
-                                                                .replaceAll(
-                                                                    '\\"',
-                                                                    '"'
-                                                                )
-                                                                .replaceAll(
-                                                                    '"',
-                                                                    ""
-                                                                )
-                                                                .split("\\n")
-                                                                .map(
-                                                                    (
-                                                                        line,
-                                                                        index
-                                                                    ) => {
-                                                                        return (
-                                                                            <p
-                                                                                key={`${review.reviewer}-${section}-${index}`}
-                                                                            >
-                                                                                {
-                                                                                    line
-                                                                                }
-                                                                            </p>
-                                                                        );
-                                                                    }
-                                                                )}
-                                                        </div>
-                                                    );
-                                                }
-                                            )}
-                                        </Card>
+                                            reviewer={review.reviewer}
+                                            reviewConent={review.content}
+                                        />
                                     );
                                 })}
                         </div>
@@ -430,76 +351,22 @@ export default function Page() {
                                             comment={comment}
                                         />
                                     ))}
-                                    <div className="mt-4">
-                                        <form
-                                            className="grid gap-4"
-                                            onSubmit={submitComment}
-                                            onKeyDown={handleKeyDown}
-                                        >
-                                            <div className="grid gap-2">
-                                                <Label htmlFor="comment">
-                                                    Add a comment
-                                                </Label>
-                                                <Textarea
-                                                    id="comment"
-                                                    placeholder="Write your comment..."
-                                                    className="min-h-[100px]"
-                                                    value={newCommentContent}
-                                                    onChange={(e) =>
-                                                        setNewCommentContent(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <Button
-                                                type="submit"
-                                                className="w-full"
-                                            >
-                                                Post Comment
-                                            </Button>
-                                        </form>
-                                    </div>
+                                    <DiscussionTextarea
+                                        setCurrentComments={setCurrentComments}
+                                    />
                                 </DiscussionSection>
                             ) : (
                                 <>
                                     {filteredIssues &&
                                         filteredIssues.map((issue) => (
-                                            <Card
-                                                className="hover: cursor-pointer hover:bg-slate-100"
+                                            <IssueCard
                                                 key={issue.title}
+                                                issueTitle={issue.title}
+                                                issueTags={issue.tags}
                                                 onClick={() => {
                                                     setCurrentIssue(issue);
                                                 }}
-                                            >
-                                                <CardContent>
-                                                    <h3 className="text-lg font-medium">
-                                                        {issue.title}
-                                                    </h3>
-                                                    <p className="text-sm text-muted-foreground"></p>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        {Object.entries(
-                                                            issue.tags
-                                                        ).map(
-                                                            ([
-                                                                tagCategory,
-                                                                tag,
-                                                            ]) => (
-                                                                <Badge
-                                                                    key={`${issue.title}-${tag}-tag`}
-                                                                    variant="outline"
-                                                                >
-                                                                    {tag}
-                                                                </Badge>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                                <CardFooter className="text-xs text-muted-foreground">
-                                                    Last Edited by John Doe on
-                                                    2023-07-01
-                                                </CardFooter>
-                                            </Card>
+                                            />
                                         ))}
                                 </>
                             )}
@@ -516,25 +383,10 @@ export default function Page() {
                         <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                             Rebuttal Draft
                         </div>
-                        <div className="flex-1 p-4 overflow-auto">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Badge variant="outline">Tag 1</Badge>
-                                    <Badge variant="outline">Tag 2</Badge>
-                                    <Badge variant="outline">Tag 3</Badge>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">
-                                        Author 1
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                        Author 2
-                                    </span>
-                                </div>
-                            </div>
+                        <div className="flex-1 p-4 overflow-auto mt-20">
                             <Textarea
                                 placeholder="Type your response here..."
-                                className="w-full min-h-[100px] rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-full min-h-[300px] rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
                             />
                             <div className="flex justify-end mt-4">
                                 <Button>Save</Button>

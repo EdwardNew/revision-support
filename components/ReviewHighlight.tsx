@@ -16,7 +16,7 @@ export function ReviewHighlight({
     issue,
     onClick,
 }: ReviewHighlightProps) {
-    console.log(scrollContainer);
+    // console.log(scrollContainer);
     if (!scrollContainer.current) {
         return;
     }
