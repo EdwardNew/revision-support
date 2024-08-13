@@ -50,6 +50,10 @@ export type Issue = {
     };
     highlight: {
         text: string;
+        startElementXPath?: string;
+        endElementXPath?: string;
+        startOffset?: number;
+        endOffset?: number;
         rects: Rect[];
         initialScrollPosition: number;
     };
@@ -153,6 +157,8 @@ export default function Page() {
 
         const rect = activeSelection.getRangeAt(0).getBoundingClientRect();
 
+        console.log(activeSelection.getRangeAt(0));
+
         setPosition({
             x: rect.left + rect.width / 2 - 80 / 2,
             y: rect.top - 80 + (scrollContainer.current?.scrollTop ?? 0),
@@ -165,8 +171,37 @@ export default function Page() {
         if (!selection) {
             return;
         }
-        console.log(selection.getRangeAt(0));
-        console.log(selection.getRangeAt(0).getClientRects());
+        // console.log(selection.getRangeAt(0));
+        // console.log(selection.getRangeAt(0).getClientRects());
+
+        const selectedIssue = allIssues[2];
+
+        const newRange = document.createRange();
+
+        // console.log(selectedIssue.highlight.startElementXPath);
+        const startElement = document.evaluate(
+            selectedIssue.highlight.startElementXPath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE
+        ).singleNodeValue?.childNodes[0];
+        const endElement = document.evaluate(
+            selectedIssue.highlight.endElementXPath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE
+        ).singleNodeValue?.childNodes[0];
+        console.log(startElement);
+
+        newRange.setStart(startElement, selectedIssue.highlight.startOffset);
+        newRange.setEnd(endElement, selectedIssue.highlight.endOffset);
+        // console.log(newRange);
+
+        // console.log(newRange.toString());
+
+        // console.log(selectedIssue.highlight.rects);
+        selectedIssue.highlight.rects = Array.from(newRange.getClientRects());
+        // console.log(selectedIssue.highlight.rects);
 
         const comment = prompt("Enter a comment for this highlight:");
         if (!comment) return;
@@ -175,7 +210,7 @@ export default function Page() {
         const text = selectedRange.toString();
         const rects = Array.from(selectedRange.getClientRects());
         console.log(selectedRange.getClientRects());
-        console.log(rects);
+        // console.log(rects);
 
         const newIssue = {
             title: comment,
@@ -221,6 +256,45 @@ export default function Page() {
             document.removeEventListener("mouseup", onSelectEnd);
         };
     }, []);
+
+    useEffect(() => {
+        function handleResize() {
+            console.log("resized!");
+            const updatedAllIssues = allIssues.map((issue) => {
+                const highlight = issue.highlight;
+
+                const newRange = document.createRange();
+                const startElement = document.evaluate(
+                    highlight.startElementXPath,
+                    document,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE
+                ).singleNodeValue?.childNodes[0];
+                const endElement = document.evaluate(
+                    highlight.endElementXPath,
+                    document,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE
+                ).singleNodeValue?.childNodes[0];
+
+                newRange.setStart(startElement, highlight.startOffset);
+                newRange.setEnd(endElement, highlight.endOffset);
+
+                return {
+                    ...issue,
+                    highlight: {
+                        ...highlight,
+                        rects: Array.from(newRange.getClientRects()),
+                    },
+                };
+            });
+
+            setAllIssues(updatedAllIssues);
+        }
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [allIssues]);
 
     // discussion panel
     const [currentIssue, setCurrentIssue] = useState<Issue | null>(null);
@@ -273,6 +347,31 @@ export default function Page() {
                     <div className="flex flex-col h-full">
                         <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                             Reviews
+                        </div>
+                        <div className="flex items-center justify-between bg-card rounded-t-lg px-4 py-2 border-b border-muted">
+                            <div className="flex items-center gap-4">
+                                {reviews.length > 0 &&
+                                    reviews.map((review) => {
+                                        return (
+                                            <Button
+                                                className="text-xs"
+                                                key={review.reviewer}
+                                                onClick={() => {
+                                                    document
+                                                        .getElementById(
+                                                            review.reviewer
+                                                        )
+                                                        ?.scrollIntoView({
+                                                            behavior: "smooth",
+                                                        });
+                                                }}
+                                                variant="outline"
+                                            >
+                                                {review.reviewer}
+                                            </Button>
+                                        );
+                                    })}
+                            </div>
                         </div>
                         <div
                             id="scroll-container"

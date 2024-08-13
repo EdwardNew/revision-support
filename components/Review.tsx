@@ -7,9 +7,9 @@ type ReviewProps = {
 
 export function Review({ reviewer, reviewConent }: ReviewProps) {
     return (
-        <Card className="p-4 mx-2 my-6">
-            <CardTitle>{reviewer}</CardTitle>
-            <CardContent>
+        <Card id={reviewer} className="p-4 mx-2 my-6">
+            {/* <CardTitle>{reviewer}</CardTitle> */}
+            <CardContent className="p-0">
                 {Object.entries(reviewConent).map(([section, content]) => {
                     return (
                         <div key={`${reviewer}-${section}`} className="text-sm">

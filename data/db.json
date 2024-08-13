@@ -73,8 +73,12 @@
             },
             "highlight": {
                 "text": "summary_of_the_paper",
+                "startElementXPath": "//*[@id='reviewer 1']/div/div[1]/p[1]",
+                "endElementXPath": "//*[@id='reviewer 1']/div/div[1]/p[1]",
+                "startOffset": 0,
+                "endOffset": 20,
                 "rects": [
-                    { "x": 42, "y": 113, "height": 17, "width": 160.09375 }
+                    { "x": 42, "y": 166, "height": 17, "width": 160.09375 }
                 ],
                 "initialScrollPosition": 0
             },
@@ -110,14 +114,29 @@
             },
             "highlight": {
                 "text": " 5 will make the contributions more clear.- In additi",
+                "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[8]",
+                "endElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[9]",
+                "startOffset": 174,
+                "endOffset": 11,
                 "rects": [
                     {
-                        "x": 91.765625,
-                        "y": 443,
+                        "x": 578.6875,
+                        "y": 476,
                         "height": 17,
-                        "width": 270.953125
+                        "width": 98.4375
                     },
-                    { "x": 42, "y": 463, "height": 17, "width": 62.71875 }
+                    {
+                        "x": 42,
+                        "y": 496,
+                        "height": 17,
+                        "width": 164.6374969482422
+                    },
+                    {
+                        "x": 42,
+                        "y": 516,
+                        "height": 17,
+                        "width": 62.72500228881836
+                    }
                 ],
                 "initialScrollPosition": 0
             },
@@ -153,14 +172,23 @@
             },
             "highlight": {
                 "text": "or do we have more noisy-labelled samples (as explained in 1st paragraph of Section 4.1)?",
+                "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[12]",
+                "endElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[12]",
+                "startOffset": 174,
+                "endOffset": 263,
                 "rects": [
                     {
-                        "x": 63.75,
-                        "y": 643,
+                        "x": 550.9750366210938,
+                        "y": 656,
                         "height": 17,
-                        "width": 505.78125
+                        "width": 131.3125
                     },
-                    { "x": 42, "y": 663, "height": 17, "width": 83.078125 }
+                    {
+                        "x": 42,
+                        "y": 676,
+                        "height": 17,
+                        "width": 457.54998779296875
+                    }
                 ],
                 "initialScrollPosition": 0
             },
@@ -196,10 +224,14 @@
             },
             "highlight": {
                 "text": "Figures 2 to 4?",
+                "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[13]",
+                "endElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[13]",
+                "startOffset": 48,
+                "endOffset": 63,
                 "rects": [
                     {
                         "x": 359.96875,
-                        "y": 683,
+                        "y": 696,
                         "height": 17,
                         "width": 98.515625
                     }
