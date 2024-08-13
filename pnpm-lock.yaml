@@ -50,6 +50,9 @@ dependencies:
   cmdk:
     specifier: ^1.0.0
     version: 1.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+  get-xpath:
+    specifier: ^3.1.0
+    version: 3.1.0
   next:
     specifier: 14.2.5
     version: 14.2.5(react-dom@18.3.1)(react@18.3.1)
@@ -2772,6 +2775,10 @@ packages:
     dependencies:
       resolve-pkg-maps: 1.0.0
     dev: true
+
+  /get-xpath@3.1.0:
+    resolution: {integrity: sha512-R/52dpa+WO8bO/df5VivWIf+VoI++iPVEPrAKRUSQHOBEK1cxKMmTxbhCoGUNIH+znE9ZvU5rFd188QkV4Q6QA==}
+    dev: false
 
   /glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}

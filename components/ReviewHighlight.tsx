@@ -1,8 +1,8 @@
-import type { Rect, Issue } from "@/app/page";
+import type { Issue } from "@/app/page";
 import { MutableRefObject } from "react";
 
 type ReviewHighlightProps = {
-    rect: Rect;
+    rect: DOMRect;
     initialScrollPosition: number;
     scrollContainer: MutableRefObject<HTMLElement | null>;
     issue: Issue;

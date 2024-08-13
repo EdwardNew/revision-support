@@ -36,6 +36,8 @@ import "katex/dist/katex.min.css";
 import Latex from "react-latex-next";
 import Script from "next/script";
 
+import getXPath from "get-xpath";
+
 type Review = {
     reviewer: string;
     content: object;
@@ -50,11 +52,11 @@ export type Issue = {
     };
     highlight: {
         text: string;
-        startElementXPath?: string;
-        endElementXPath?: string;
-        startOffset?: number;
-        endOffset?: number;
-        rects: Rect[];
+        startElementXPath: string;
+        endElementXPath: string;
+        startOffset: number;
+        endOffset: number;
+        rects: DOMRect[];
         initialScrollPosition: number;
     };
     discussion: DiscussionComment[];
@@ -70,13 +72,6 @@ export type DiscussionComment = {
     content: string;
     author: string;
     timestamp: string;
-};
-
-export type Rect = {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
 };
 
 export default function Page() {
@@ -133,6 +128,8 @@ export default function Page() {
     const [selectionText, setSelectionText] = useState<string>();
     const [position, setPosition] = useState<Record<string, number>>();
     const [selection, setSelection] = useState<Selection>();
+    const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(25);
+    const allIssuesRef = useRef<Array<Issue>>(allIssues);
     const scrollContainer = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
@@ -157,8 +154,6 @@ export default function Page() {
 
         const rect = activeSelection.getRangeAt(0).getBoundingClientRect();
 
-        console.log(activeSelection.getRangeAt(0));
-
         setPosition({
             x: rect.left + rect.width / 2 - 80 / 2,
             y: rect.top - 80 + (scrollContainer.current?.scrollTop ?? 0),
@@ -171,46 +166,26 @@ export default function Page() {
         if (!selection) {
             return;
         }
-        // console.log(selection.getRangeAt(0));
-        // console.log(selection.getRangeAt(0).getClientRects());
-
-        const selectedIssue = allIssues[2];
-
-        const newRange = document.createRange();
-
-        // console.log(selectedIssue.highlight.startElementXPath);
-        const startElement = document.evaluate(
-            selectedIssue.highlight.startElementXPath,
-            document,
-            null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE
-        ).singleNodeValue?.childNodes[0];
-        const endElement = document.evaluate(
-            selectedIssue.highlight.endElementXPath,
-            document,
-            null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE
-        ).singleNodeValue?.childNodes[0];
-        console.log(startElement);
-
-        newRange.setStart(startElement, selectedIssue.highlight.startOffset);
-        newRange.setEnd(endElement, selectedIssue.highlight.endOffset);
-        // console.log(newRange);
-
-        // console.log(newRange.toString());
-
-        // console.log(selectedIssue.highlight.rects);
-        selectedIssue.highlight.rects = Array.from(newRange.getClientRects());
-        // console.log(selectedIssue.highlight.rects);
 
         const comment = prompt("Enter a comment for this highlight:");
         if (!comment) return;
 
         const selectedRange = selection.getRangeAt(0);
         const text = selectedRange.toString();
+        const startElementXPath = getXPath(
+            selectedRange.startContainer.parentElement
+        );
+        let endElementXPath = startElementXPath;
+        if (
+            !selectedRange.startContainer.isEqualNode(
+                selectedRange.endContainer
+            )
+        ) {
+            endElementXPath = getXPath(
+                selectedRange.endContainer.parentElement
+            );
+        }
         const rects = Array.from(selectedRange.getClientRects());
-        console.log(selectedRange.getClientRects());
-        // console.log(rects);
 
         const newIssue = {
             title: comment,
@@ -221,6 +196,10 @@ export default function Page() {
             },
             highlight: {
                 text: text,
+                startElementXPath: startElementXPath,
+                endElementXPath: endElementXPath,
+                startOffset: selectedRange.startOffset,
+                endOffset: selectedRange.endOffset,
                 rects: rects,
                 initialScrollPosition: scrollContainer.current?.scrollTop ?? 0,
             },
@@ -249,18 +228,24 @@ export default function Page() {
     }
 
     useEffect(() => {
+        console.log(allIssues);
+        allIssuesRef.current = allIssues;
+    }, [allIssues]);
+
+    useEffect(() => {
         document.addEventListener("selectstart", onSelectStart);
         document.addEventListener("mouseup", onSelectEnd);
+        window.addEventListener("resize", handleResize);
         return () => {
             document.removeEventListener("selectstart", onSelectStart);
             document.removeEventListener("mouseup", onSelectEnd);
+            window.removeEventListener("resize", handleResize);
         };
     }, []);
 
-    useEffect(() => {
-        function handleResize() {
-            console.log("resized!");
-            const updatedAllIssues = allIssues.map((issue) => {
+    function handleResize() {
+        const updatedAllIssues = allIssuesRef.current
+            .map((issue) => {
                 const highlight = issue.highlight;
 
                 const newRange = document.createRange();
@@ -277,6 +262,10 @@ export default function Page() {
                     XPathResult.FIRST_ORDERED_NODE_TYPE
                 ).singleNodeValue?.childNodes[0];
 
+                if (!(startElement && endElement)) {
+                    return;
+                }
+
                 newRange.setStart(startElement, highlight.startOffset);
                 newRange.setEnd(endElement, highlight.endOffset);
 
@@ -287,14 +276,17 @@ export default function Page() {
                         rects: Array.from(newRange.getClientRects()),
                     },
                 };
-            });
+            })
+            .filter((issue): issue is Issue => issue !== undefined); // Filters out undefined values
 
-            setAllIssues(updatedAllIssues);
-        }
+        setAllIssues(updatedAllIssues);
+    }
 
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [allIssues]);
+    useEffect(() => {}, []);
+
+    useEffect(() => {
+        handleResize();
+    }, [reviewsPanelSize]);
 
     // discussion panel
     const [currentIssue, setCurrentIssue] = useState<Issue | null>(null);
@@ -307,7 +299,6 @@ export default function Page() {
     }
 
     useEffect(() => {
-        // console.log(currentIssue);
         console.log(scrollContainer.current?.getBoundingClientRect().top);
         if (!currentIssue) {
             return;
@@ -343,6 +334,9 @@ export default function Page() {
                     defaultSize={25}
                     minSize={20}
                     collapsible={true}
+                    onResize={(size) => {
+                        setReviewsPanelSize(size);
+                    }}
                 >
                     <div className="flex flex-col h-full">
                         <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
@@ -377,6 +371,22 @@ export default function Page() {
                             id="scroll-container"
                             className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
                         >
+                            <ReviewHighlightTooltip
+                                selectionText={selectionText}
+                                position={position}
+                                createNewHighlight={createNewHighlight}
+                            />
+                            {reviews.length > 0 &&
+                                reviews.map((review) => {
+                                    return (
+                                        <Review
+                                            key={review.reviewer}
+                                            reviewer={review.reviewer}
+                                            reviewConent={review.content}
+                                        />
+                                    );
+                                })}
+
                             {filteredIssues &&
                                 filteredIssues.map((issue) =>
                                     issue.highlight.rects.map((rect) => (
@@ -395,22 +405,6 @@ export default function Page() {
                                         />
                                     ))
                                 )}
-
-                            <ReviewHighlightTooltip
-                                selectionText={selectionText}
-                                position={position}
-                                createNewHighlight={createNewHighlight}
-                            />
-                            {reviews.length > 0 &&
-                                reviews.map((review) => {
-                                    return (
-                                        <Review
-                                            key={review.reviewer}
-                                            reviewer={review.reviewer}
-                                            reviewConent={review.content}
-                                        />
-                                    );
-                                })}
                         </div>
                     </div>
                 </ResizablePanel>
