@@ -17,6 +17,7 @@ export function IssueCard({
 }: IssueCardProps) {
     return (
         <Card
+            id={issueTitle}
             onClick={onClick}
             className="hover: cursor-pointer hover:bg-slate-100"
         >

@@ -158,7 +158,6 @@ export function ReviewHighlightTooltip({
             startOffset: selection.startOffset,
             endOffset: selection.endOffset,
             rects: rects,
-            initialScrollPosition: 0,
         };
         newIssue.tags.reviewer = getReviewer(selection.startContainer);
         newIssue.tags.status = "not started";

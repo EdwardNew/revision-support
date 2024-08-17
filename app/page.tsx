@@ -29,7 +29,7 @@ import { IssueCard } from "@/components/IssueCard";
 
 import type { IHighlight } from "react-pdf-highlighter";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 
 import Markdown from "react-markdown";
 import "katex/dist/katex.min.css";
@@ -56,7 +56,6 @@ export type Issue = {
         startOffset: number;
         endOffset: number;
         rects: DOMRect[];
-        initialScrollPosition: number;
     };
     discussion?: DiscussionComment[];
 };
@@ -128,6 +127,11 @@ export default function Page() {
             setFilteredIssues(filteredIssues);
         }
     }, [selectedTags, allIssues]);
+
+    // recalculates newly re-rendered rect positions incase scrolling happned while they were unmounted
+    useEffect(() => {
+        handleResize();
+    }, [selectedTags]);
 
     // handle review highlights
     const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(50);
@@ -288,10 +292,7 @@ export default function Page() {
                             id="scroll-container"
                             className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
                         >
-                            <div
-                                id="test"
-                                style={{ backgroundColor: "red" }}
-                            ></div>
+                            <div id="scroll-container-top-marker"></div>
                             <ReviewHighlightTooltip
                                 scrollContainer={scrollContainer.current}
                                 setAllIssues={setAllIssues}
@@ -313,19 +314,7 @@ export default function Page() {
                                         <ReviewHighlight
                                             key={`${rect.x}-x-${rect.y}-y`}
                                             rect={rect}
-                                            scrollContainer={scrollContainer}
-                                            scrollContainerScrollTop={
-                                                scrollContainerScrollTop.current
-                                            }
-                                            initialScrollPosition={
-                                                issue.highlight
-                                                    .initialScrollPosition
-                                            }
                                             issue={issue}
-                                            onClick={
-                                                (issue) => {}
-                                                // setCurrentIssue(issue)
-                                            }
                                         />
                                     ))
                                 )}
@@ -340,7 +329,7 @@ export default function Page() {
                 >
                     <div className="flex flex-col h-full">
                         <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                            Outline
+                            Notes
                         </div>
                         <div className="flex items-center justify-between mb-4 ps-6">
                             <div className="flex items-center gap-2">
