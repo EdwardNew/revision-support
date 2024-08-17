@@ -4,19 +4,27 @@ import { Badge } from "@/components/ui/badge";
 
 type IssueCardProps = {
     issueTitle: string;
+    issueSelectedText: string;
     issueTags: Record<string, string>;
     onClick: () => void;
 };
 
-export function IssueCard({ issueTitle, issueTags, onClick }: IssueCardProps) {
+export function IssueCard({
+    issueTitle,
+    issueSelectedText,
+    issueTags,
+    onClick,
+}: IssueCardProps) {
     return (
         <Card
             onClick={onClick}
             className="hover: cursor-pointer hover:bg-slate-100"
         >
             <CardContent>
-                <h3 className="text-lg font-medium">{issueTitle}</h3>
-                <p className="text-sm text-muted-foreground"></p>
+                <h3 className="font-medium mt-2">{issueTitle}</h3>
+                <p className="text-muted-foreground bg-yellow-200 inline text-xs">
+                    {`"${issueSelectedText}"`}
+                </p>
                 <div className="flex items-center gap-2 mt-2">
                     {Object.entries(issueTags).map(([tagCategory, tag]) => (
                         <Badge

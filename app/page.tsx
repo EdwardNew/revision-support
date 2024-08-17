@@ -21,9 +21,9 @@ import { Sidebar } from "@/components/pdf/Sidebar";
 import { Searchbar } from "@/components/Searchbar";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
 import { ReviewHighlightTooltip } from "@/components/ReviewHighlightTooltip";
-import { DiscussionSection } from "@/components/DiscussionSection";
-import { DiscussionCard } from "@/components/DisucssionCard";
-import { DiscussionTextarea } from "@/components/DiscussionTextarea";
+// import { DiscussionSection } from "@/components/DiscussionSection";
+// import { DiscussionCard } from "@/components/DisucssionCard";
+// import { DiscussionTextarea } from "@/components/DiscussionTextarea";
 import { Review } from "@/components/Review";
 import { IssueCard } from "@/components/IssueCard";
 
@@ -36,8 +36,6 @@ import "katex/dist/katex.min.css";
 import Latex from "react-latex-next";
 import Script from "next/script";
 
-import getXPath from "get-xpath";
-
 type Review = {
     reviewer: string;
     content: object;
@@ -45,6 +43,7 @@ type Review = {
 
 export type Issue = {
     title: string;
+    comment?: string;
     tags: {
         reviewer: string;
         type: string;
@@ -59,7 +58,13 @@ export type Issue = {
         rects: DOMRect[];
         initialScrollPosition: number;
     };
-    discussion: DiscussionComment[];
+    discussion?: DiscussionComment[];
+};
+
+export type Tag = {
+    reviewer: string;
+    type: string;
+    status: string;
 };
 
 export type Tags = {
@@ -125,129 +130,23 @@ export default function Page() {
     }, [selectedTags, allIssues]);
 
     // handle review highlights
-    const [selectionText, setSelectionText] = useState<string>();
-    const [position, setPosition] = useState<Record<string, number>>();
-    const [selection, setSelection] = useState<Selection>();
-    const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(25);
+    const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(50);
     const allIssuesRef = useRef<Array<Issue>>(allIssues);
     const scrollContainer = useRef<HTMLElement | null>(null);
+    const scrollContainerScrollTop = useRef<number>(0);
 
     useEffect(() => {
         scrollContainer.current = document.getElementById("scroll-container");
     }, []);
 
-    function onSelectStart() {
-        setSelectionText(undefined);
-    }
-
-    function onSelectEnd() {
-        const activeSelection = document.getSelection();
-        const text = activeSelection?.toString();
-
-        if (!activeSelection || !text) {
-            setSelectionText(undefined);
-            return;
-        }
-
-        setSelection(activeSelection);
-        setSelectionText(text);
-
-        const rect = activeSelection.getRangeAt(0).getBoundingClientRect();
-
-        setPosition({
-            x: rect.left + rect.width / 2 - 80 / 2,
-            y: rect.top - 80 + (scrollContainer.current?.scrollTop ?? 0),
-            width: rect.width,
-            height: rect.height,
-        });
-    }
-
-    function createNewHighlight() {
-        if (!selection) {
-            return;
-        }
-
-        const comment = prompt("Enter a comment for this highlight:");
-        if (!comment) return;
-
-        const selectedRange = selection.getRangeAt(0);
-        const text = selectedRange.toString();
-        const startElementXPath = getXPath(
-            selectedRange.startContainer.parentElement
-        );
-        let endElementXPath = startElementXPath;
-        if (
-            !selectedRange.startContainer.isEqualNode(
-                selectedRange.endContainer
-            )
-        ) {
-            endElementXPath = getXPath(
-                selectedRange.endContainer.parentElement
-            );
-        }
-        const rects = Array.from(selectedRange.getClientRects());
-
-        const newIssue = {
-            title: comment,
-            tags: {
-                reviewer: "reviewer 1",
-                type: "novelty",
-                status: "done",
-            },
-            highlight: {
-                text: text,
-                startElementXPath: startElementXPath,
-                endElementXPath: endElementXPath,
-                startOffset: selectedRange.startOffset,
-                endOffset: selectedRange.endOffset,
-                rects: rects,
-                initialScrollPosition: scrollContainer.current?.scrollTop ?? 0,
-            },
-            discussion: [
-                {
-                    content: "[Placeholder text]",
-                    author: "TestAuthor",
-                    timestamp: new Date().toISOString().slice(0, -5) + "Z",
-                },
-            ],
-        };
-
-        setAllIssues((prevIssues) => [...prevIssues, newIssue]);
-
-        // const range = selection.getRangeAt(0);
-        // console.log(range);
-        // const mark = document.createElement("mark");
-        // mark.classList.add("bg-yellow-200");
-        // mark.classList.add("py-px");
-        // mark.appendChild(range.extractContents());
-        // range.insertNode(mark);
-
-        // // Clear the selection after highlighting
-        // setSelectionText(undefined);
-        // setSelection(null);
-    }
-
     useEffect(() => {
-        console.log(allIssues);
         allIssuesRef.current = allIssues;
     }, [allIssues]);
-
-    useEffect(() => {
-        document.addEventListener("selectstart", onSelectStart);
-        document.addEventListener("mouseup", onSelectEnd);
-        window.addEventListener("resize", handleResize);
-        return () => {
-            document.removeEventListener("selectstart", onSelectStart);
-            document.removeEventListener("mouseup", onSelectEnd);
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
 
     function handleResize() {
         const updatedAllIssues = allIssuesRef.current
             .map((issue) => {
                 const highlight = issue.highlight;
-
                 const newRange = document.createRange();
                 const startElement = document.evaluate(
                     highlight.startElementXPath,
@@ -282,29 +181,47 @@ export default function Page() {
         setAllIssues(updatedAllIssues);
     }
 
-    useEffect(() => {}, []);
+    // handle initial page load highlght recalculations
+    const [issuesInitalUpdated, setIssuesInitalUpdated] = useState(false);
+    useEffect(() => {
+        if (allIssues.length > 0) {
+            setIssuesInitalUpdated(true);
+        }
+    }, [allIssues]);
+    useEffect(() => {
+        if (issuesInitalUpdated) {
+            handleResize();
+        }
+    }, [issuesInitalUpdated]);
+
+    // handle window and panel resize highlight recalculations
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         handleResize();
     }, [reviewsPanelSize]);
 
-    // discussion panel
-    const [currentIssue, setCurrentIssue] = useState<Issue | null>(null);
-    const [currentComments, setCurrentComments] = useState<
-        Array<DiscussionComment>
-    >([]);
+    /* discussion panel */
+    // const [currentIssue, setCurrentIssue] = useState<Issue | null>(null);
+    // const [currentComments, setCurrentComments] = useState<
+    //     Array<DiscussionComment>
+    // >([]);
 
-    function updateCurrentIssue(issue: Issue) {
-        setCurrentIssue(issue);
-    }
+    // function updateCurrentIssue(issue: Issue) {
+    //     setCurrentIssue(issue);
+    // }
 
-    useEffect(() => {
-        console.log(scrollContainer.current?.getBoundingClientRect().top);
-        if (!currentIssue) {
-            return;
-        }
-        setCurrentComments(currentIssue?.discussion);
-    }, [currentIssue]);
+    // useEffect(() => {
+    //     if (!currentIssue) {
+    //         return;
+    //     }
+    //     setCurrentComments(currentIssue?.discussion);
+    // }, [currentIssue]);
 
     return (
         <div className="flex h-screen overflow-y-hidden">
@@ -331,7 +248,7 @@ export default function Page() {
                 </ResizablePanel>
                 <ResizableHandle withHandle /> */}
                 <ResizablePanel
-                    defaultSize={25}
+                    defaultSize={50}
                     minSize={20}
                     collapsible={true}
                     onResize={(size) => {
@@ -349,7 +266,7 @@ export default function Page() {
                                         return (
                                             <Button
                                                 className="text-xs"
-                                                key={review.reviewer}
+                                                key={`${review.reviewer}-btn`}
                                                 onClick={() => {
                                                     document
                                                         .getElementById(
@@ -371,10 +288,13 @@ export default function Page() {
                             id="scroll-container"
                             className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
                         >
+                            <div
+                                id="test"
+                                style={{ backgroundColor: "red" }}
+                            ></div>
                             <ReviewHighlightTooltip
-                                selectionText={selectionText}
-                                position={position}
-                                createNewHighlight={createNewHighlight}
+                                scrollContainer={scrollContainer.current}
+                                setAllIssues={setAllIssues}
                             />
                             {reviews.length > 0 &&
                                 reviews.map((review) => {
@@ -394,13 +314,17 @@ export default function Page() {
                                             key={`${rect.x}-x-${rect.y}-y`}
                                             rect={rect}
                                             scrollContainer={scrollContainer}
+                                            scrollContainerScrollTop={
+                                                scrollContainerScrollTop.current
+                                            }
                                             initialScrollPosition={
                                                 issue.highlight
                                                     .initialScrollPosition
                                             }
                                             issue={issue}
-                                            onClick={(issue) =>
-                                                setCurrentIssue(issue)
+                                            onClick={
+                                                (issue) => {}
+                                                // setCurrentIssue(issue)
                                             }
                                         />
                                     ))
@@ -410,7 +334,7 @@ export default function Page() {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel
-                    defaultSize={25}
+                    defaultSize={50}
                     minSize={20}
                     collapsible={true}
                 >
@@ -419,7 +343,13 @@ export default function Page() {
                             Outline
                         </div>
                         <div className="flex items-center justify-between mb-4 ps-6">
-                            {currentIssue ? (
+                            <div className="flex items-center gap-2">
+                                <Searchbar
+                                    selectedTags={selectedTags}
+                                    setSelectedTags={setSelectedTags}
+                                />
+                            </div>
+                            {/* {currentIssue ? (
                                 <button
                                     className="mt-6"
                                     onClick={() => setCurrentIssue(null)}
@@ -433,10 +363,37 @@ export default function Page() {
                                         setSelectedTags={setSelectedTags}
                                     />
                                 </div>
-                            )}
+                            )} */}
                         </div>
                         <div className="grid gap-4 p-6 overflow-y-auto">
-                            {currentIssue ? (
+                            {filteredIssues &&
+                                filteredIssues.map((issue) => (
+                                    <IssueCard
+                                        key={issue.title}
+                                        issueTitle={issue.title}
+                                        issueSelectedText={issue.highlight.text}
+                                        issueTags={issue.tags}
+                                        onClick={() => {
+                                            // setCurrentIssue(issue);
+
+                                            const highlight = document.evaluate(
+                                                issue.highlight
+                                                    .startElementXPath,
+                                                document,
+                                                null,
+                                                XPathResult.FIRST_ORDERED_NODE_TYPE
+                                            )?.singleNodeValue?.childNodes[0]
+                                                ?.parentElement;
+                                            if (highlight) {
+                                                highlight.scrollIntoView({
+                                                    behavior: "smooth",
+                                                    block: "start",
+                                                });
+                                            }
+                                        }}
+                                    />
+                                ))}
+                            {/* {currentIssue ? (
                                 <DiscussionSection currentIssue={currentIssue}>
                                     {currentComments.map((comment) => (
                                         <DiscussionCard
@@ -455,14 +412,36 @@ export default function Page() {
                                             <IssueCard
                                                 key={issue.title}
                                                 issueTitle={issue.title}
+                                                issueSelectedText={
+                                                    issue.highlight.text
+                                                }
                                                 issueTags={issue.tags}
                                                 onClick={() => {
-                                                    setCurrentIssue(issue);
+                                                    // setCurrentIssue(issue);
+                                                    const highlight =
+                                                        document.evaluate(
+                                                            issue.highlight
+                                                                .startElementXPath,
+                                                            document,
+                                                            null,
+                                                            XPathResult.FIRST_ORDERED_NODE_TYPE
+                                                        )?.singleNodeValue
+                                                            ?.childNodes[0]
+                                                            ?.parentElement;
+                                                    if (highlight) {
+                                                        highlight.scrollIntoView(
+                                                            {
+                                                                behavior:
+                                                                    "smooth",
+                                                                block: "start",
+                                                            }
+                                                        );
+                                                    }
                                                 }}
                                             />
                                         ))}
                                 </>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </ResizablePanel>

@@ -108,7 +108,7 @@
         {
             "title": "Lacks Novelty",
             "tags": {
-                "reviewer": "reviewer 2",
+                "reviewer": "reviewer 1",
                 "type": "novelty",
                 "status": "in progress"
             },
@@ -166,7 +166,7 @@
         {
             "title": "Typo in Section 4",
             "tags": {
-                "reviewer": "reviewer 3",
+                "reviewer": "reviewer 1",
                 "type": "grammar & style",
                 "status": "not started"
             },
@@ -218,7 +218,7 @@
         {
             "title": "Problematic Assumption",
             "tags": {
-                "reviewer": "reviewer 2",
+                "reviewer": "reviewer 1",
                 "type": "technical accuracy",
                 "status": "done"
             },
