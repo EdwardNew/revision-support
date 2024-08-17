@@ -66,6 +66,7 @@
     "issues": [
         {
             "title": "Lacks Clarity",
+            "comment": "need to rewrite",
             "tags": {
                 "reviewer": "reviewer 1",
                 "type": "technical accuracy",
@@ -76,36 +77,12 @@
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[1]/p[1]",
                 "endElementXPath": "//*[@id='reviewer 1']/div/div[1]/p[1]",
                 "startOffset": 0,
-                "endOffset": 20,
-                "rects": [
-                    { "x": 42, "y": 166, "height": 17, "width": 160.09375 }
-                ]
-            },
-            "discussion": [
-                {
-                    "content": "I received feedback that my paper lacks clarity. Any tips on how to improve this?",
-                    "author": "AuthorA",
-                    "timestamp": "2024-08-05T09:00:00Z"
-                },
-                {
-                    "content": "You might want to try breaking down complex ideas into simpler parts and using more examples to illustrate your points.",
-                    "author": "AuthorB",
-                    "timestamp": "2024-08-05T09:05:00Z"
-                },
-                {
-                    "content": "Also, make sure your introduction clearly outlines the structure of the paper so readers know what to expect.",
-                    "author": "AuthorC",
-                    "timestamp": "2024-08-05T09:10:00Z"
-                },
-                {
-                    "content": "Thanks! I'll revise the introduction and add more examples to the main sections.",
-                    "author": "AuthorA",
-                    "timestamp": "2024-08-05T09:15:00Z"
-                }
-            ]
+                "endOffset": 20
+            }
         },
         {
             "title": "Lacks Novelty",
+            "comment": "cite other papers and argue the impact of new findings",
             "tags": {
                 "reviewer": "reviewer 1",
                 "type": "novelty",
@@ -116,53 +93,12 @@
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[8]",
                 "endElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[9]",
                 "startOffset": 174,
-                "endOffset": 11,
-                "rects": [
-                    {
-                        "x": 578.6875,
-                        "y": 476,
-                        "height": 17,
-                        "width": 98.4375
-                    },
-                    {
-                        "x": 42,
-                        "y": 496,
-                        "height": 17,
-                        "width": 164.6374969482422
-                    },
-                    {
-                        "x": 42,
-                        "y": 516,
-                        "height": 17,
-                        "width": 62.72500228881836
-                    }
-                ]
-            },
-            "discussion": [
-                {
-                    "content": "My paper was criticized for lacking novelty. How can I address this?",
-                    "author": "AuthorB",
-                    "timestamp": "2024-08-05T10:00:00Z"
-                },
-                {
-                    "content": "You might need to highlight more clearly what is new about your approach compared to previous work.",
-                    "author": "AuthorD",
-                    "timestamp": "2024-08-05T10:05:00Z"
-                },
-                {
-                    "content": "Consider adding a section that specifically discusses the contributions and novelty of your research.",
-                    "author": "AuthorE",
-                    "timestamp": "2024-08-05T10:10:00Z"
-                },
-                {
-                    "content": "Good idea, I'll add a contributions section and compare my results with existing studies more explicitly.",
-                    "author": "AuthorB",
-                    "timestamp": "2024-08-05T10:15:00Z"
-                }
-            ]
+                "endOffset": 11
+            }
         },
         {
             "title": "Typo in Section 4",
+            "comment": "need to fix",
             "tags": {
                 "reviewer": "reviewer 1",
                 "type": "grammar & style",
@@ -173,47 +109,12 @@
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[12]",
                 "endElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[12]",
                 "startOffset": 174,
-                "endOffset": 263,
-                "rects": [
-                    {
-                        "x": 550.9750366210938,
-                        "y": 656,
-                        "height": 17,
-                        "width": 131.3125
-                    },
-                    {
-                        "x": 42,
-                        "y": 676,
-                        "height": 17,
-                        "width": 457.54998779296875
-                    }
-                ]
-            },
-            "discussion": [
-                {
-                    "content": "A reviewer pointed out a typo in section 4. What's the best way to handle this?",
-                    "author": "AuthorC",
-                    "timestamp": "2024-08-05T11:00:00Z"
-                },
-                {
-                    "content": "Just correct the typo and make a note of it in your response to the reviewer. It's a minor issue.",
-                    "author": "AuthorF",
-                    "timestamp": "2024-08-05T11:05:00Z"
-                },
-                {
-                    "content": "Double-check the entire section for any other potential errors while you're at it.",
-                    "author": "AuthorG",
-                    "timestamp": "2024-08-05T11:10:00Z"
-                },
-                {
-                    "content": "Will do. I'll correct the typo and ensure the rest of the section is error-free.",
-                    "author": "AuthorC",
-                    "timestamp": "2024-08-05T11:15:00Z"
-                }
-            ]
+                "endOffset": 263
+            }
         },
         {
             "title": "Problematic Assumption",
+            "comment": "need to go back and check assumptions",
             "tags": {
                 "reviewer": "reviewer 1",
                 "type": "technical accuracy",
@@ -224,38 +125,8 @@
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[13]",
                 "endElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[13]",
                 "startOffset": 48,
-                "endOffset": 63,
-                "rects": [
-                    {
-                        "x": 359.96875,
-                        "y": 696,
-                        "height": 17,
-                        "width": 98.515625
-                    }
-                ]
-            },
-            "discussion": [
-                {
-                    "content": "One of the reviewers mentioned that there's a problematic assumption in my model. How should I address this?",
-                    "author": "AuthorD",
-                    "timestamp": "2024-08-05T12:00:00Z"
-                },
-                {
-                    "content": "First, identify exactly what the assumption is and why it's problematic. Then, see if you can either justify it better or modify your model to avoid the assumption.",
-                    "author": "AuthorH",
-                    "timestamp": "2024-08-05T12:05:00Z"
-                },
-                {
-                    "content": "If the assumption is unavoidable, clearly state its limitations and how they might affect the results.",
-                    "author": "AuthorI",
-                    "timestamp": "2024-08-05T12:10:00Z"
-                },
-                {
-                    "content": "Great advice. I'll review the assumption and decide whether to justify it more clearly or adjust my model.",
-                    "author": "AuthorD",
-                    "timestamp": "2024-08-05T12:15:00Z"
-                }
-            ]
+                "endOffset": 63
+            }
         }
     ]
 }

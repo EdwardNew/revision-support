@@ -31,14 +31,13 @@ const emptyIssue = {
         type: "",
         status: "",
     },
+    timestamp: "",
     highlight: {
         text: "",
         startElementXPath: "",
         endElementXPath: "",
         startOffset: 0,
         endOffset: 0,
-        rects: [],
-        initialScrollPosition: 0,
     },
 };
 
@@ -88,7 +87,6 @@ export function ReviewHighlightTooltip({
 
     useEffect(() => {
         function handleMouseUp(e: MouseEvent) {
-            console.log("mouse up", selectionInReviews(e.target as Node));
             const selectedRange = document.getSelection()?.getRangeAt(0);
             if (
                 selectedRange &&
@@ -149,7 +147,6 @@ export function ReviewHighlightTooltip({
                     selection.endContainer.parentElement as Node
                 )?.[0] || "";
         }
-        const rects = Array.from(selection.getClientRects());
 
         newIssue.highlight = {
             text: selection.toString(),
@@ -157,10 +154,11 @@ export function ReviewHighlightTooltip({
             endElementXPath: endElementXPath,
             startOffset: selection.startOffset,
             endOffset: selection.endOffset,
-            rects: rects,
         };
+
         newIssue.tags.reviewer = getReviewer(selection.startContainer);
         newIssue.tags.status = "not started";
+        newIssue.timestamp = new Date().toISOString().slice(0, -5) + "Z";
 
         setAllIssues((prevIssues) => [...prevIssues, newIssue]);
 
@@ -169,6 +167,14 @@ export function ReviewHighlightTooltip({
 
     return (
         <>
+            {selection &&
+                Array.from(selection.getClientRects()).map((rect) => (
+                    <ReviewHighlight
+                        key={`${rect.x}-x-${rect.y}-y`}
+                        rect={rect}
+                        issueId=""
+                    />
+                ))}
             {showTooltip && position && (
                 <div
                     className="

@@ -1,13 +1,12 @@
 import React from "react";
-import type { Issue } from "@/app/page";
 
 type ReviewHighlightProps = {
     rect: DOMRect;
-    issue: Issue;
+    issueId: string;
 };
 
 export const ReviewHighlight = React.memo(
-    function ReviewHighlight({ rect, issue }: ReviewHighlightProps) {
+    function ReviewHighlight({ rect, issueId }: ReviewHighlightProps) {
         const scrollContainerTop = document
             .getElementById("scroll-container-top-marker")
             ?.getBoundingClientRect().y;
@@ -25,7 +24,7 @@ export const ReviewHighlight = React.memo(
                     width: `${rect.width}px`,
                 }}
                 onClick={() => {
-                    document.getElementById(issue.title)?.scrollIntoView({
+                    document.getElementById(issueId)?.scrollIntoView({
                         behavior: "smooth",
                         block: "start",
                     });
@@ -35,6 +34,6 @@ export const ReviewHighlight = React.memo(
         );
     },
     (prevProps, nextProps) => {
-        return prevProps.issue === nextProps.issue;
+        return prevProps.rect === nextProps.rect;
     }
 );

@@ -7,34 +7,20 @@ import {
     ResizableHandle,
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-
-import { ChevronLeftIcon } from "@radix-ui/react-icons";
 
 // custom components imports
-
 import { Pdf } from "@/components/pdf/Pdf";
 import { Sidebar } from "@/components/pdf/Sidebar";
 import { Searchbar } from "@/components/Searchbar";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
 import { ReviewHighlightTooltip } from "@/components/ReviewHighlightTooltip";
+import { Review } from "@/components/Review";
+import { IssueCard } from "@/components/IssueCard";
 // import { DiscussionSection } from "@/components/DiscussionSection";
 // import { DiscussionCard } from "@/components/DisucssionCard";
 // import { DiscussionTextarea } from "@/components/DiscussionTextarea";
-import { Review } from "@/components/Review";
-import { IssueCard } from "@/components/IssueCard";
-
-import type { IHighlight } from "react-pdf-highlighter";
 
 import { useState, useEffect, useRef, use } from "react";
-
-import Markdown from "react-markdown";
-import "katex/dist/katex.min.css";
-import Latex from "react-latex-next";
-import Script from "next/script";
 
 type Review = {
     reviewer: string;
@@ -43,21 +29,25 @@ type Review = {
 
 export type Issue = {
     title: string;
-    comment?: string;
+    comment: string;
     tags: {
         reviewer: string;
         type: string;
         status: string;
     };
+    timestamp: string;
     highlight: {
         text: string;
         startElementXPath: string;
         endElementXPath: string;
         startOffset: number;
         endOffset: number;
-        rects: DOMRect[];
     };
-    discussion?: DiscussionComment[];
+};
+
+export type ReviewHighlight = {
+    rects: DOMRect[];
+    issueId: string;
 };
 
 export type Tag = {
@@ -72,14 +62,14 @@ export type Tags = {
     status: string[];
 };
 
-export type DiscussionComment = {
-    content: string;
-    author: string;
-    timestamp: string;
-};
+// export type DiscussionComment = {
+//     content: string;
+//     author: string;
+//     timestamp: string;
+// };
 
 export default function Page() {
-    const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
+    // const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
 
     // get and store peer review data
     const [reviews, setReviews] = useState<Array<Review>>([]);
@@ -128,27 +118,15 @@ export default function Page() {
         }
     }, [selectedTags, allIssues]);
 
-    // recalculates newly re-rendered rect positions incase scrolling happned while they were unmounted
-    useEffect(() => {
-        handleResize();
-    }, [selectedTags]);
-
     // handle review highlights
     const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(50);
-    const allIssuesRef = useRef<Array<Issue>>(allIssues);
     const scrollContainer = useRef<HTMLElement | null>(null);
-    const scrollContainerScrollTop = useRef<number>(0);
+    const [reviewHighlights, setReviewHighlights] = useState<
+        Array<ReviewHighlight>
+    >([]);
 
-    useEffect(() => {
-        scrollContainer.current = document.getElementById("scroll-container");
-    }, []);
-
-    useEffect(() => {
-        allIssuesRef.current = allIssues;
-    }, [allIssues]);
-
-    function handleResize() {
-        const updatedAllIssues = allIssuesRef.current
+    function handleResize(currentIssues: Issue[]) {
+        const updatedReviewHighlights = currentIssues
             .map((issue) => {
                 const highlight = issue.highlight;
                 const newRange = document.createRange();
@@ -173,41 +151,37 @@ export default function Page() {
                 newRange.setEnd(endElement, highlight.endOffset);
 
                 return {
-                    ...issue,
-                    highlight: {
-                        ...highlight,
-                        rects: Array.from(newRange.getClientRects()),
-                    },
+                    issueId: issue.title,
+                    rects: Array.from(newRange.getClientRects()),
                 };
             })
-            .filter((issue): issue is Issue => issue !== undefined); // Filters out undefined values
+            .filter(
+                (highlight): highlight is ReviewHighlight =>
+                    highlight !== undefined
+            ); // Filters out undefined values;
 
-        setAllIssues(updatedAllIssues);
+        setReviewHighlights(updatedReviewHighlights);
     }
 
-    // handle initial page load highlght recalculations
-    const [issuesInitalUpdated, setIssuesInitalUpdated] = useState(false);
     useEffect(() => {
-        if (allIssues.length > 0) {
-            setIssuesInitalUpdated(true);
-        }
-    }, [allIssues]);
-    useEffect(() => {
-        if (issuesInitalUpdated) {
-            handleResize();
-        }
-    }, [issuesInitalUpdated]);
-
-    // handle window and panel resize highlight recalculations
-    useEffect(() => {
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
+        scrollContainer.current = document.getElementById("scroll-container");
     }, []);
 
     useEffect(() => {
-        handleResize();
+        handleResize(filteredIssues);
+
+        function onResize() {
+            handleResize(filteredIssues);
+        }
+        window.addEventListener("resize", onResize);
+
+        return () => {
+            window.removeEventListener("resize", onResize);
+        };
+    }, [filteredIssues]);
+
+    useEffect(() => {
+        handleResize(filteredIssues);
     }, [reviewsPanelSize]);
 
     /* discussion panel */
@@ -228,7 +202,7 @@ export default function Page() {
     // }, [currentIssue]);
 
     return (
-        <div className="flex h-screen overflow-y-hidden">
+        <div className="flex h-screen">
             <ResizablePanelGroup
                 direction="horizontal"
                 className="w-full border rounded-lg"
@@ -308,13 +282,13 @@ export default function Page() {
                                     );
                                 })}
 
-                            {filteredIssues &&
-                                filteredIssues.map((issue) =>
-                                    issue.highlight.rects.map((rect) => (
+                            {reviewHighlights &&
+                                reviewHighlights.map((highlight) =>
+                                    highlight.rects.map((rect) => (
                                         <ReviewHighlight
                                             key={`${rect.x}-x-${rect.y}-y`}
                                             rect={rect}
-                                            issue={issue}
+                                            issueId={highlight.issueId}
                                         />
                                     ))
                                 )}
@@ -359,27 +333,7 @@ export default function Page() {
                                 filteredIssues.map((issue) => (
                                     <IssueCard
                                         key={issue.title}
-                                        issueTitle={issue.title}
-                                        issueSelectedText={issue.highlight.text}
-                                        issueTags={issue.tags}
-                                        onClick={() => {
-                                            // setCurrentIssue(issue);
-
-                                            const highlight = document.evaluate(
-                                                issue.highlight
-                                                    .startElementXPath,
-                                                document,
-                                                null,
-                                                XPathResult.FIRST_ORDERED_NODE_TYPE
-                                            )?.singleNodeValue?.childNodes[0]
-                                                ?.parentElement;
-                                            if (highlight) {
-                                                highlight.scrollIntoView({
-                                                    behavior: "smooth",
-                                                    block: "start",
-                                                });
-                                            }
-                                        }}
+                                        issue={issue}
                                     />
                                 ))}
                             {/* {currentIssue ? (
