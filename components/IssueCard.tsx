@@ -17,11 +17,14 @@ import {
     TrashIcon,
     Pencil2Icon,
     CheckIcon,
+    CheckCircledIcon,
+    CrossCircledIcon,
 } from "@radix-ui/react-icons";
 
 import { Button } from "@/components/ui/button";
-
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+
 import type { Issue } from "@/app/page";
 
 import { DeleteIssueDialog } from "@/components/DeleteIssueDialog";
@@ -34,6 +37,8 @@ type IssueCardProps = {
 
 export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
     const [showDeleteIssue, setShowDeleteIssue] = useState<boolean>(false);
+    const [showEdit, setShowEdit] = useState<boolean>(false);
+    const [newComment, setNewComment] = useState<string>(issue.comment);
 
     return (
         <>
@@ -77,6 +82,7 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                                 <DropdownMenuItem
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        setShowEdit(true);
                                     }}
                                 >
                                     <Pencil2Icon className="w-4 h-4 mr-2" />
@@ -104,9 +110,62 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm font-medium pb-2 pl-1">
-                        {issue.comment}
-                    </p>
+                    {showEdit ? (
+                        <div className="flex items-center gap-10">
+                            <Textarea
+                                value={newComment}
+                                onChange={(e) => {
+                                    setNewComment(e.target.value);
+                                }}
+                            />
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className=" text-muted-foreground"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+
+                                        setShowEdit(false);
+                                    }}
+                                >
+                                    <CrossCircledIcon className="w-6 h-6" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="hover:text-green-600 text-green-500"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAllIssues((prevIssues) => {
+                                            return prevIssues.map(
+                                                (prevIssue) => {
+                                                    if (
+                                                        prevIssue.title ===
+                                                        issue.title
+                                                    ) {
+                                                        return {
+                                                            ...prevIssue,
+                                                            comment: newComment,
+                                                        };
+                                                    }
+                                                    return prevIssue;
+                                                }
+                                            );
+                                        });
+                                        setShowEdit(false);
+                                    }}
+                                >
+                                    <CheckCircledIcon className="w-6 h-6" />
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-sm font-medium pb-2 pl-1">
+                            {issue.comment}
+                        </p>
+                    )}
+
                     <div className="flex items-center gap-2 mt-2">
                         {Object.entries(issue.tags).map(
                             ([tagCategory, tag]) => (
