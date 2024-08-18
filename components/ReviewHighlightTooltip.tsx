@@ -168,13 +168,31 @@ export function ReviewHighlightTooltip({
     return (
         <>
             {selection &&
-                Array.from(selection.getClientRects()).map((rect) => (
-                    <ReviewHighlight
-                        key={`${rect.x}-x-${rect.y}-y`}
-                        rect={rect}
-                        issueId=""
-                    />
-                ))}
+                Array.from(selection.getClientRects())
+                    .filter((rect) => {
+                        // const commonAncestorContainer =
+                        //     selection.commonAncestorContainer;
+                        // if (commonAncestorContainer instanceof Element) {
+                        //     return (
+                        //         rect.width !==
+                        //         commonAncestorContainer.getBoundingClientRect()
+                        //             .width
+                        //     );
+                        // }
+                        // return true;
+
+                        const reviewContainerWidth = document
+                            .getElementById("reviewer 1")
+                            ?.children[0]?.getBoundingClientRect().width;
+                        return rect.width < (reviewContainerWidth ?? 0);
+                    })
+                    .map((rect) => (
+                        <ReviewHighlight
+                            key={`${rect.x}-x-${rect.y}-y`}
+                            rect={rect}
+                            issueId=""
+                        />
+                    ))}
             {showTooltip && position && (
                 <div
                     className="

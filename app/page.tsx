@@ -152,7 +152,25 @@ export default function Page() {
 
                 return {
                     issueId: issue.title,
-                    rects: Array.from(newRange.getClientRects()),
+                    rects: Array.from(newRange.getClientRects()).filter(
+                        (rect) => {
+                            // const commonAncestorContainer =
+                            //     selection.commonAncestorContainer;
+                            // if (commonAncestorContainer instanceof Element) {
+                            //     return (
+                            //         rect.width !==
+                            //         commonAncestorContainer.getBoundingClientRect()
+                            //             .width
+                            //     );
+                            // }
+                            // return true;
+
+                            const reviewContainerWidth = document
+                                .getElementById("reviewer 1")
+                                ?.children[0]?.getBoundingClientRect().width;
+                            return rect.width < (reviewContainerWidth ?? 0);
+                        }
+                    ),
                 };
             })
             .filter(
@@ -190,7 +208,7 @@ export default function Page() {
     //     Array<DiscussionComment>
     // >([]);
 
-    // function updateCurrentIssue(issue: Issue) {
+    // function updateCurrentIssue(issue: Issue) {`
     //     setCurrentIssue(issue);
     // }
 
