@@ -352,6 +352,7 @@ export default function Page() {
                                     <IssueCard
                                         key={issue.title}
                                         issue={issue}
+                                        setAllIssues={setAllIssues}
                                     />
                                 ))}
                             {/* {currentIssue ? (

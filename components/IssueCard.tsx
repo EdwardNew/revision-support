@@ -1,4 +1,9 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+    Card,
+    CardHeader,
+    CardContent,
+    CardFooter,
+} from "@/components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,7 +16,7 @@ import {
     DotsVerticalIcon,
     TrashIcon,
     Pencil2Icon,
-    CheckCircledIcon,
+    CheckIcon,
 } from "@radix-ui/react-icons";
 
 import { Button } from "@/components/ui/button";
@@ -19,85 +24,115 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Issue } from "@/app/page";
 
+import { DeleteIssueDialog } from "@/components/DeleteIssueDialog";
+import { useState } from "react";
+
 type IssueCardProps = {
     issue: Issue;
+    setAllIssues: React.Dispatch<React.SetStateAction<Array<Issue>>>;
 };
 
-export function IssueCard({ issue }: IssueCardProps) {
-    return (
-        <Card
-            id={issue.title}
-            onClick={() => {
-                // setCurrentIssue(issue);
+export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
+    const [showDeleteIssue, setShowDeleteIssue] = useState<boolean>(false);
 
-                const highlight = document.evaluate(
-                    issue.highlight.startElementXPath,
-                    document,
-                    null,
-                    XPathResult.FIRST_ORDERED_NODE_TYPE
-                )?.singleNodeValue?.childNodes[0]?.parentElement;
-                if (highlight) {
-                    highlight.scrollIntoView({
-                        behavior: "smooth",
-                    });
-                }
-            }}
-            className="hover: cursor-pointer hover:bg-slate-100"
-        >
-            <CardContent>
-                <div className="flex justify-between">
-                    <h3 className="font-medium mt-2">{issue.title}</h3>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                className="h-8 w-8 p-0 hover:bg-slate-200"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <span className="sr-only">Open menu</span>
-                                <DotsVerticalIcon className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <Pencil2Icon className="w-4 h-4 mr-2" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <CheckCircledIcon className="w-4 h-4 mr-2" />
-                                Update Status
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <TrashIcon className="w-4 h-4 mr-2" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-                <p className="text-muted-foreground bg-yellow-200 inline text-xs">
-                    {`"${issue.highlight.text}"`}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                    {Object.entries(issue.tags).map(([tagCategory, tag]) => (
-                        <Badge
-                            key={`${issue.title}-${tag}-tag`}
-                            variant="outline"
-                        >
-                            {tag}
-                        </Badge>
-                    ))}
-                </div>
-            </CardContent>
-            <CardFooter className="text-xs text-muted-foreground">
-                Last Edited at {issue.timestamp}
-            </CardFooter>
-        </Card>
+    return (
+        <>
+            <Card
+                id={issue.title}
+                onClick={() => {
+                    // setCurrentIssue(issue);
+
+                    const highlight = document.evaluate(
+                        issue.highlight.startElementXPath,
+                        document,
+                        null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE
+                    )?.singleNodeValue?.childNodes[0]?.parentElement;
+                    if (highlight) {
+                        highlight.scrollIntoView({
+                            behavior: "smooth",
+                        });
+                    }
+                }}
+                className="hover: cursor-pointer hover:bg-slate-100"
+            >
+                <CardHeader className="py-5">
+                    <div className="flex justify-between">
+                        {/* <h3 className="font-medium mt-2">{issue.title}</h3> */}
+                        <p className="text-muted-foreground bg-yellow-200 text-xs mr-8">
+                            {`"${issue.highlight.text}"`}
+                        </p>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0 hover:bg-slate-200 -mr-2 -mt-3"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <span className="sr-only">Open menu</span>
+                                    <DotsVerticalIcon className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                    }}
+                                >
+                                    <Pencil2Icon className="w-4 h-4 mr-2" />
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <CheckIcon className="w-4 h-4 mr-2" />
+                                    Resolve
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowDeleteIssue(true);
+                                    }}
+                                    className="hover:text-red-400"
+                                >
+                                    <TrashIcon className="w-4 h-4 mr-2" />
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm font-medium pb-2 pl-1">
+                        {issue.comment}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                        {Object.entries(issue.tags).map(
+                            ([tagCategory, tag]) => (
+                                <Badge
+                                    key={`${issue.title}-${tag}-tag`}
+                                    variant="outline"
+                                    className="font-normal"
+                                >
+                                    {tag}
+                                </Badge>
+                            )
+                        )}
+                    </div>
+                </CardContent>
+                <CardFooter className="pb-4 text-xs text-muted-foreground">
+                    Last Edited at {issue.timestamp}
+                </CardFooter>
+            </Card>
+
+            {showDeleteIssue && (
+                <DeleteIssueDialog
+                    issueTitle={issue.title}
+                    setShowDeleteIssue={setShowDeleteIssue}
+                    setAllIssues={setAllIssues}
+                />
+            )}
+        </>
     );
 }

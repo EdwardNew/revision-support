@@ -72,6 +72,7 @@
                 "type": "technical accuracy",
                 "status": "in progress"
             },
+            "timestamp": "2024-01-01T12:00:00Z",
             "highlight": {
                 "text": "summary_of_the_paper",
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[1]/p[1]",
@@ -88,6 +89,7 @@
                 "type": "novelty",
                 "status": "in progress"
             },
+            "timestamp": "2024-01-01T12:00:00Z",
             "highlight": {
                 "text": " 5 will make the contributions more clear.- In additi",
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[8]",
@@ -104,6 +106,7 @@
                 "type": "grammar & style",
                 "status": "not started"
             },
+            "timestamp": "2024-01-01T12:00:00Z",
             "highlight": {
                 "text": "or do we have more noisy-labelled samples (as explained in 1st paragraph of Section 4.1)?",
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[12]",
@@ -120,6 +123,7 @@
                 "type": "technical accuracy",
                 "status": "done"
             },
+            "timestamp": "2024-01-01T12:00:00Z",
             "highlight": {
                 "text": "Figures 2 to 4?",
                 "startElementXPath": "//*[@id='reviewer 1']/div/div[2]/p[13]",
