@@ -138,11 +138,11 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setAllIssues((prevIssues) => {
-                                            return prevIssues.map(
-                                                (prevIssue) => {
+                                            const updatedIssues =
+                                                prevIssues.map((prevIssue) => {
                                                     if (
-                                                        prevIssue.title ===
-                                                        issue.title
+                                                        prevIssue._id ===
+                                                        issue._id
                                                     ) {
                                                         return {
                                                             ...prevIssue,
@@ -150,8 +150,17 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                                                         };
                                                     }
                                                     return prevIssue;
+                                                });
+                                            fetch(
+                                                `http://localhost:3000/issues?id=${issue._id}`,
+                                                {
+                                                    method: "PATCH",
+                                                    body: JSON.stringify({
+                                                        comment: newComment,
+                                                    }),
                                                 }
                                             );
+                                            return updatedIssues;
                                         });
                                         setShowEdit(false);
                                     }}
@@ -187,7 +196,7 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
 
             {showDeleteIssue && (
                 <DeleteIssueDialog
-                    issueTitle={issue.title}
+                    issueId={issue._id}
                     setShowDeleteIssue={setShowDeleteIssue}
                     setAllIssues={setAllIssues}
                 />

@@ -12,22 +12,28 @@ import type { Issue } from "@/app/page";
 import { useRef } from "react";
 
 type DeleteIssueDialogProps = {
-    issueTitle: string;
+    issueId: string;
     setShowDeleteIssue: React.Dispatch<React.SetStateAction<boolean>>;
     setAllIssues: React.Dispatch<React.SetStateAction<Array<Issue>>>;
 };
 
 export function DeleteIssueDialog({
-    issueTitle,
+    issueId,
     setShowDeleteIssue,
     setAllIssues,
 }: DeleteIssueDialogProps) {
     const cancelBtn = useRef<HTMLButtonElement | null>(null);
 
     function handleDeleteIssue() {
-        setAllIssues((prevIssues) =>
-            [...prevIssues].filter((issue) => issue.title !== issueTitle)
-        );
+        setAllIssues((prevIssues) => {
+            const updatedIssues = [...prevIssues].filter(
+                (issue) => issue._id !== issueId
+            );
+            fetch(`http://localhost:3000/issues?id=${issueId}`, {
+                method: "DELETE",
+            });
+            return updatedIssues;
+        });
     }
 
     return (

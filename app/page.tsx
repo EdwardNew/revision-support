@@ -20,7 +20,7 @@ import { IssueCard } from "@/components/IssueCard";
 // import { DiscussionCard } from "@/components/DisucssionCard";
 // import { DiscussionTextarea } from "@/components/DiscussionTextarea";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type Review = {
     reviewer: string;
@@ -28,6 +28,7 @@ type Review = {
 };
 
 export type Issue = {
+    _id: string;
     title: string;
     comment: string;
     tags: {
@@ -68,8 +69,10 @@ export type Tags = {
 //     timestamp: string;
 // };
 
+import type { IHighlight } from "react-pdf-highlighter";
+
 export default function Page() {
-    // const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
+    const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
 
     // get and store peer review data
     const [reviews, setReviews] = useState<Array<Review>>([]);
@@ -95,14 +98,18 @@ export default function Page() {
     const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/issues")
+        fetch("http://localhost:3000/issues")
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
-                setAllIssues(data);
+                setAllIssues(data.items);
             });
     }, []);
+
+    useEffect(() => {
+        console.log(allIssues);
+    }, [allIssues]);
 
     useEffect(() => {
         const allSelectedTags = Object.values(selectedTags).flat();
@@ -225,26 +232,26 @@ export default function Page() {
                 direction="horizontal"
                 className="w-full border rounded-lg"
             >
-                {/* <ResizablePanel
-                    defaultSize={25}
+                <ResizablePanel
+                    defaultSize={35}
                     minSize={20}
                     collapsible={true}
                 >
                     <div className="flex flex-col h-full">
-                        <div className="bg-primary text-primary-foreground px-4 py-3 font-medium rounded-t-lg">
+                        <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                             PDF Viewer
                         </div>
                         <div>
                             <Pdf
-                                highlights={highlights}
-                                setHighlights={setHighlights}
+                                highlights={pdfHighlights}
+                                setHighlights={setPdfHighlights}
                             />
                         </div>
                     </div>
                 </ResizablePanel>
-                <ResizableHandle withHandle /> */}
+                <ResizableHandle withHandle />
                 <ResizablePanel
-                    defaultSize={50}
+                    defaultSize={40}
                     minSize={20}
                     collapsible={true}
                     onResize={(size) => {
@@ -315,7 +322,7 @@ export default function Page() {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel
-                    defaultSize={50}
+                    defaultSize={25}
                     minSize={20}
                     collapsible={true}
                 >

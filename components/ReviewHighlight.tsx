@@ -11,12 +11,16 @@ export const ReviewHighlight = React.memo(
             .getElementById("scroll-container-top-marker")
             ?.getBoundingClientRect().y;
 
+        const scrollContainerLeft = document
+            .getElementById("scroll-container-top-marker")
+            ?.getBoundingClientRect().x;
+
         return (
             <div
                 key={`${rect.x}-x-${rect.y}-y`}
                 className="bg-yellow-600/50 absolute hover:cursor-pointer"
                 style={{
-                    left: `${rect.x}px`,
+                    left: `${rect.x - (scrollContainerLeft ?? 0) + 16}px`,
                     top: `${
                         rect.y - (scrollContainerTop ?? 0) + rect.height
                     }px`,

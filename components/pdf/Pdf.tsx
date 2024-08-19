@@ -18,17 +18,14 @@ import type {
 } from "react-pdf-highlighter";
 
 import Tip from "./Tip";
-import { Spinner } from "./Spinner";
+import { Spinner } from "./Spinner/Spinner";
 import { testHighlights as _testHighlights } from "./test-highlights";
+
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 
 // import "./style/App.css";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
-
-interface State {
-    url: string;
-    highlights: Array<IHighlight>;
-}
 
 const getNextId = () => String(Math.random()).slice(2);
 
@@ -45,17 +42,18 @@ const HighlightPopup = ({
     comment: { text: string; emoji: string };
 }) =>
     comment.text ? (
-        <div className="Highlight__popup">
-            {comment.emoji} {comment.text}
-        </div>
+        // <div className="Highlight__popup">
+        //     {comment.emoji} {comment.text}
+        // </div>
+        <></>
     ) : null;
 
 const searchParams = new URLSearchParams(document.location.search);
 
-interface PdfProps {
+type PdfProps = {
     highlights: Array<IHighlight>;
     setHighlights: React.Dispatch<React.SetStateAction<Array<IHighlight>>>;
-}
+};
 
 export function Pdf({ highlights, setHighlights }: PdfProps) {
     const [pdfUrl, setPdfUrl] = useState("");
@@ -72,6 +70,42 @@ export function Pdf({ highlights, setHighlights }: PdfProps) {
         };
         fetchPdf();
     }, []);
+
+    /* CODE FOR GETTING ALL TEXT SNIPPETS AND THEIR COORDS FROM PDF*/
+    useEffect(() => {
+        GlobalWorkerOptions.workerSrc =
+            "https://unpkg.com/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs";
+        getDocument(pdfUrl).promise.then((pdfDocument) => {
+            const textWithCoords = [];
+
+            for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+                const page = pdfDocument.getPage(pageNum).then((page) => {
+                    const textContent = page
+                        .getTextContent()
+                        .then((textContent) => {
+                            // console.log(textContent);
+                            textContent.items.forEach((item) => {
+                                const transform = item.transform;
+                                const x = transform[4];
+                                const y = transform[5];
+                                const width = item.width;
+                                const height = item.height;
+
+                                textWithCoords.push({
+                                    pageNum,
+                                    text: item.str,
+                                    x,
+                                    y,
+                                    width,
+                                    height,
+                                });
+                            });
+                        });
+                    // .then(() => console.log(textWithCoords));
+                });
+            }
+        });
+    }, [pdfUrl]);
 
     const resetHighlights = () => {
         setHighlights([]);
@@ -159,7 +193,7 @@ export function Pdf({ highlights, setHighlights }: PdfProps) {
             <div
                 style={{
                     height: "100vh",
-                    width: "75vw",
+                    width: "100vw",
                     position: "relative",
                 }}
             >

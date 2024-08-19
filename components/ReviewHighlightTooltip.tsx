@@ -24,6 +24,7 @@ type ReviewHighlightTooltipProps = {
 };
 
 const emptyIssue = {
+    _id: "",
     title: "",
     comment: "",
     tags: {
@@ -88,6 +89,9 @@ export function ReviewHighlightTooltip({
     useEffect(() => {
         function handleMouseUp(e: MouseEvent) {
             const selectedRange = document.getSelection()?.getRangeAt(0);
+            const scrollContainerLeft = document
+                .getElementById("scroll-container-top-marker")
+                ?.getBoundingClientRect().x;
             if (
                 selectedRange &&
                 selectedRange.toString().length > 0 &&
@@ -96,7 +100,11 @@ export function ReviewHighlightTooltip({
                 setSelection(selectedRange);
                 const tooltipRect = selectedRange.getBoundingClientRect();
                 setPosition({
-                    x: tooltipRect.left + tooltipRect.width / 2 - 80 / 2,
+                    x:
+                        tooltipRect.left -
+                        ((scrollContainerLeft ?? 0) + 16) +
+                        tooltipRect.width / 2 -
+                        80 / 2,
                     y:
                         tooltipRect.top -
                         80 +
@@ -160,7 +168,14 @@ export function ReviewHighlightTooltip({
         newIssue.tags.status = "not started";
         newIssue.timestamp = new Date().toISOString().slice(0, -5) + "Z";
 
-        setAllIssues((prevIssues) => [...prevIssues, newIssue]);
+        setAllIssues((prevIssues) => {
+            const updatedIssues = [...prevIssues, newIssue];
+            fetch("http://localhost:3000/issues", {
+                method: "POST",
+                body: JSON.stringify(newIssue),
+            });
+            return updatedIssues;
+        });
 
         setShowForm(false);
     }
