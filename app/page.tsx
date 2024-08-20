@@ -30,7 +30,6 @@ type Review = {
 
 export type Issue = {
     _id: string;
-    title: string;
     comment: string;
     tags: {
         reviewer: string;
@@ -109,10 +108,6 @@ export default function Page() {
     }, []);
 
     useEffect(() => {
-        console.log(allIssues);
-    }, [allIssues]);
-
-    useEffect(() => {
         const allSelectedTags = Object.values(selectedTags).flat();
         if (allSelectedTags.length === 0) {
             setFilteredIssues(allIssues);
@@ -159,7 +154,7 @@ export default function Page() {
                 newRange.setEnd(endElement, highlight.endOffset);
 
                 return {
-                    issueId: issue.title,
+                    issueId: issue._id,
                     rects: Array.from(newRange.getClientRects()).filter(
                         (rect) => {
                             // const commonAncestorContainer =
@@ -235,7 +230,7 @@ export default function Page() {
 
     return (
         <>
-            <div className="flex justify-evenly p-5">
+            <div className="flex justify-evenly p-5 ">
                 <Button
                     variant="outline"
                     className={`${showPDF ? "" : panelHiddenClass}`}
@@ -277,7 +272,7 @@ export default function Page() {
                     Rebuttal
                 </Button>
             </div>
-            <div className="flex h-screen">
+            <div className="flex h-[600px]">
                 <ResizablePanelGroup
                     direction="horizontal"
                     className="w-full border rounded-lg"
@@ -435,7 +430,7 @@ export default function Page() {
                                         {filteredIssues &&
                                             filteredIssues.map((issue) => (
                                                 <IssueCard
-                                                    key={issue.title}
+                                                    key={issue._id}
                                                     issue={issue}
                                                     setAllIssues={setAllIssues}
                                                 />
@@ -457,7 +452,7 @@ export default function Page() {
                                     {filteredIssues &&
                                         filteredIssues.map((issue) => (
                                             <IssueCard
-                                                key={issue.title}
+                                                key={issue._id}
                                                 issueTitle={issue.title}
                                                 issueSelectedText={
                                                     issue.highlight.text

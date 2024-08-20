@@ -43,7 +43,7 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
     return (
         <>
             <Card
-                id={issue.title}
+                id={issue._id}
                 onClick={() => {
                     // setCurrentIssue(issue);
 
@@ -63,7 +63,6 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
             >
                 <CardHeader className="py-5">
                     <div className="flex justify-between">
-                        {/* <h3 className="font-medium mt-2">{issue.title}</h3> */}
                         <p className="text-muted-foreground bg-yellow-200 text-xs mr-8">
                             {`"${issue.highlight.text}"`}
                         </p>
@@ -179,7 +178,7 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                         {Object.entries(issue.tags).map(
                             ([tagCategory, tag]) => (
                                 <Badge
-                                    key={`${issue.title}-${tag}-tag`}
+                                    key={`${issue._id}-${tag}-tag`}
                                     variant="outline"
                                     className="font-normal"
                                 >

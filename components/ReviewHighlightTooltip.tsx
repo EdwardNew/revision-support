@@ -23,9 +23,24 @@ type ReviewHighlightTooltipProps = {
     setAllIssues: React.Dispatch<React.SetStateAction<Array<Issue>>>;
 };
 
+type EmptyIssue = {
+    comment: string;
+    tags: {
+        reviewer: string;
+        type: string;
+        status: string;
+    };
+    timestamp: string;
+    highlight: {
+        text: string;
+        startElementXPath: string;
+        endElementXPath: string;
+        startOffset: number;
+        endOffset: number;
+    };
+};
+
 const emptyIssue = {
-    _id: "",
-    title: "",
     comment: "",
     tags: {
         reviewer: "",
@@ -48,7 +63,7 @@ export function ReviewHighlightTooltip({
 }: ReviewHighlightTooltipProps) {
     const [showTooltip, setShowTooltip] = useState<boolean>(false);
     const [showForm, setShowForm] = useState<boolean>(false);
-    const [newIssue, setNewIssue] = useState<Issue>(emptyIssue);
+    const [newIssue, setNewIssue] = useState<Issue | EmptyIssue>(emptyIssue);
     const [selection, setSelection] = useState<Range>();
     const [position, setPosition] = useState<Record<string, number>>();
 
@@ -168,14 +183,21 @@ export function ReviewHighlightTooltip({
         newIssue.tags.status = "not started";
         newIssue.timestamp = new Date().toISOString().slice(0, -5) + "Z";
 
-        setAllIssues((prevIssues) => {
-            const updatedIssues = [...prevIssues, newIssue];
-            fetch("http://localhost:3000/issues", {
-                method: "POST",
-                body: JSON.stringify(newIssue),
+        fetch("http://localhost:3000/issues", {
+            method: "POST",
+            body: JSON.stringify(newIssue),
+        })
+            .then((res) => {
+                return res.json();
+            })
+            .then((body) => {
+                (newIssue as Issue)._id = body.result.insertedId;
+                setAllIssues((prevIssues) => {
+                    const updatedIssues = [...prevIssues, newIssue as Issue];
+
+                    return updatedIssues;
+                });
             });
-            return updatedIssues;
-        });
 
         setShowForm(false);
     }
@@ -247,21 +269,6 @@ export function ReviewHighlightTooltip({
                         }}
                     >
                         <div className="grid gap-4 py-4">
-                            {/* <div className="grid gap-2">
-                                <Label htmlFor="title">Title</Label>
-                                <Input
-                                    required
-                                    id="title"
-                                    placeholder="Enter a title"
-                                    value={newIssue.title}
-                                    onChange={(e) =>
-                                        setNewIssue({
-                                            ...newIssue,
-                                            title: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div> */}
                             <div className="grid gap-2">
                                 <Label htmlFor="comment">Comment</Label>
                                 <Textarea
