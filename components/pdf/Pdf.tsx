@@ -71,40 +71,49 @@ export function Pdf({ highlights, setHighlights }: PdfProps) {
         fetchPdf();
     }, []);
 
+    GlobalWorkerOptions.workerSrc =
+        "https://unpkg.com/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+
     /* CODE FOR GETTING ALL TEXT SNIPPETS AND THEIR COORDS FROM PDF*/
     useEffect(() => {
-        GlobalWorkerOptions.workerSrc =
-            "https://unpkg.com/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs";
-        getDocument(pdfUrl).promise.then((pdfDocument) => {
-            const textWithCoords = [];
+        if (!pdfUrl) {
+            return;
+        }
+        getDocument(pdfUrl)
+            .promise.then((pdfDocument) => {
+                return pdfDocument.getOutline();
+                // const textWithCoords = [];
 
-            for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
-                const page = pdfDocument.getPage(pageNum).then((page) => {
-                    const textContent = page
-                        .getTextContent()
-                        .then((textContent) => {
-                            // console.log(textContent);
-                            textContent.items.forEach((item) => {
-                                const transform = item.transform;
-                                const x = transform[4];
-                                const y = transform[5];
-                                const width = item.width;
-                                const height = item.height;
+                // for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+                //     const page = pdfDocument.getPage(pageNum).then((page) => {
+                //         const textContent = page
+                //             .getTextContent()
+                //             .then((textContent) => {
+                //                 // console.log(textContent);
+                //                 textContent.items.forEach((item) => {
+                //                     const transform = item.transform;
+                //                     const x = transform[4];
+                //                     const y = transform[5];
+                //                     const width = item.width;
+                //                     const height = item.height;
 
-                                textWithCoords.push({
-                                    pageNum,
-                                    text: item.str,
-                                    x,
-                                    y,
-                                    width,
-                                    height,
-                                });
-                            });
-                        });
-                    // .then(() => console.log(textWithCoords));
-                });
-            }
-        });
+                //                     textWithCoords.push({
+                //                         pageNum,
+                //                         text: item.str,
+                //                         x,
+                //                         y,
+                //                         width,
+                //                         height,
+                //                     });
+                //                 });
+                //             });
+                //         // .then(() => console.log(textWithCoords));
+                //     });
+                // }
+            })
+            .then((outline) => {
+                console.log(outline);
+            });
     }, [pdfUrl]);
 
     const resetHighlights = () => {
@@ -189,21 +198,14 @@ export function Pdf({ highlights, setHighlights }: PdfProps) {
     };
 
     return (
-        <div className="App" style={{ display: "flex", height: "100vh" }}>
-            <div
-                style={{
-                    height: "100vh",
-                    width: "100vw",
-                    position: "relative",
-                }}
-            >
+        <div className="App flex h-full">
+            <div className="w-full relative">
                 <PdfLoader url={pdfUrl} beforeLoad={<Spinner />}>
                     {(pdfDocument) => (
                         <PdfHighlighter
                             pdfDocument={pdfDocument}
                             enableAreaSelection={(event) => event.altKey}
                             onScrollChange={resetHash}
-                            // pdfScaleValue="page-width"
                             scrollRef={(scrollTo) => {
                                 const scrollViewerTo = scrollTo;
                                 scrollToHighlightFromHash();

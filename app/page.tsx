@@ -229,7 +229,7 @@ export default function Page() {
     const panelHiddenClass = "bg-slate-300";
 
     return (
-        <>
+        <div className="flex flex-col h-screen">
             <div className="flex justify-evenly p-5 ">
                 <Button
                     variant="outline"
@@ -272,145 +272,125 @@ export default function Page() {
                     Rebuttal
                 </Button>
             </div>
-            <div className="flex h-[600px]">
-                <ResizablePanelGroup
-                    direction="horizontal"
-                    className="w-full border rounded-lg"
-                >
-                    {showPDF ? (
-                        <>
-                            <ResizablePanel
-                                defaultSize={35}
-                                minSize={20}
-                                collapsible={true}
-                            >
-                                <div className="flex flex-col h-full">
-                                    <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                        PDF Viewer
-                                    </div>
-                                    <div>
-                                        <Pdf
-                                            highlights={pdfHighlights}
-                                            setHighlights={setPdfHighlights}
-                                        />
-                                    </div>
+            <ResizablePanelGroup
+                direction="horizontal"
+                className="w-full border rounded-lg flex-grow"
+            >
+                {showPDF && (
+                    <>
+                        <ResizablePanel defaultSize={35} minSize={20}>
+                            <div className="flex flex-col h-full">
+                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                    PDF Viewer
                                 </div>
-                            </ResizablePanel>
-                            <ResizableHandle withHandle />
-                        </>
-                    ) : (
-                        <></>
-                    )}
-                    {showReviews ? (
-                        <>
-                            <ResizablePanel
-                                defaultSize={40}
-                                minSize={20}
-                                collapsible={true}
-                                onResize={(size) => {
-                                    setReviewsPanelSize(size);
-                                }}
-                            >
-                                <div className="flex flex-col h-full">
-                                    <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                        Reviews
-                                    </div>
-                                    <div className="flex items-center justify-between bg-card rounded-t-lg px-4 py-2 border-b border-muted">
-                                        <div className="flex items-center gap-4">
-                                            {reviews.length > 0 &&
-                                                reviews.map((review) => {
-                                                    return (
-                                                        <Button
-                                                            className="text-xs"
-                                                            key={`${review.reviewer}-btn`}
-                                                            onClick={() => {
-                                                                document
-                                                                    .getElementById(
-                                                                        review.reviewer
-                                                                    )
-                                                                    ?.scrollIntoView(
-                                                                        {
-                                                                            behavior:
-                                                                                "smooth",
-                                                                        }
-                                                                    );
-                                                            }}
-                                                            variant="outline"
-                                                        >
-                                                            {review.reviewer}
-                                                        </Button>
-                                                    );
-                                                })}
-                                        </div>
-                                    </div>
-                                    <div
-                                        id="scroll-container"
-                                        className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
-                                    >
-                                        <div id="scroll-container-top-marker"></div>
-                                        <ReviewHighlightTooltip
-                                            scrollContainer={
-                                                scrollContainer.current
-                                            }
-                                            setAllIssues={setAllIssues}
-                                        />
+                                <div className="h-full">
+                                    <Pdf
+                                        highlights={pdfHighlights}
+                                        setHighlights={setPdfHighlights}
+                                    />
+                                </div>
+                            </div>
+                        </ResizablePanel>
+                    </>
+                )}
+                {showReviews && (
+                    <>
+                        <ResizableHandle withHandle />
+                        <ResizablePanel
+                            defaultSize={40}
+                            minSize={20}
+                            onResize={(size) => {
+                                setReviewsPanelSize(size);
+                            }}
+                        >
+                            <div className="flex flex-col h-full">
+                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                    Reviews
+                                </div>
+                                <div className="flex items-center justify-between bg-card rounded-t-lg px-4 py-2 border-b border-muted">
+                                    <div className="flex items-center gap-4">
                                         {reviews.length > 0 &&
                                             reviews.map((review) => {
                                                 return (
-                                                    <Review
-                                                        key={review.reviewer}
-                                                        reviewer={
-                                                            review.reviewer
-                                                        }
-                                                        reviewConent={
-                                                            review.content
-                                                        }
-                                                    />
+                                                    <Button
+                                                        className="text-xs"
+                                                        key={`${review.reviewer}-btn`}
+                                                        onClick={() => {
+                                                            document
+                                                                .getElementById(
+                                                                    review.reviewer
+                                                                )
+                                                                ?.scrollIntoView(
+                                                                    {
+                                                                        behavior:
+                                                                            "smooth",
+                                                                    }
+                                                                );
+                                                        }}
+                                                        variant="outline"
+                                                    >
+                                                        {review.reviewer}
+                                                    </Button>
                                                 );
                                             })}
-
-                                        {reviewHighlights &&
-                                            reviewHighlights.map((highlight) =>
-                                                highlight.rects.map((rect) => (
-                                                    <ReviewHighlight
-                                                        key={`${rect.x}-x-${rect.y}-y`}
-                                                        rect={rect}
-                                                        issueId={
-                                                            highlight.issueId
-                                                        }
-                                                    />
-                                                ))
-                                            )}
                                     </div>
                                 </div>
-                            </ResizablePanel>
-                            <ResizableHandle withHandle />
-                        </>
-                    ) : (
-                        <></>
-                    )}
+                                <div
+                                    id="scroll-container"
+                                    className="flex-1 p-4 overflow-auto relative selection:bg-yellow-200"
+                                >
+                                    <div id="scroll-container-top-marker"></div>
+                                    <ReviewHighlightTooltip
+                                        scrollContainer={
+                                            scrollContainer.current
+                                        }
+                                        setAllIssues={setAllIssues}
+                                    />
+                                    {reviews.length > 0 &&
+                                        reviews.map((review) => {
+                                            return (
+                                                <Review
+                                                    key={review.reviewer}
+                                                    reviewer={review.reviewer}
+                                                    reviewConent={
+                                                        review.content
+                                                    }
+                                                />
+                                            );
+                                        })}
 
-                    {showNotes ? (
-                        <>
-                            <ResizablePanel
-                                defaultSize={25}
-                                minSize={20}
-                                collapsible={true}
-                            >
-                                <div className="flex flex-col h-full">
-                                    <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                        Notes
+                                    {reviewHighlights &&
+                                        reviewHighlights.map((highlight) =>
+                                            highlight.rects.map((rect) => (
+                                                <ReviewHighlight
+                                                    key={`${rect.x}-x-${rect.y}-y`}
+                                                    rect={rect}
+                                                    issueId={highlight.issueId}
+                                                />
+                                            ))
+                                        )}
+                                </div>
+                            </div>
+                        </ResizablePanel>
+                    </>
+                )}
+
+                {showNotes && (
+                    <>
+                        <ResizableHandle withHandle />
+                        <ResizablePanel defaultSize={25} minSize={20}>
+                            <div className="flex flex-col h-full">
+                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                    Notes
+                                </div>
+                                <div className="flex items-center justify-between mb-4 ps-6">
+                                    <div className="flex items-center gap-2">
+                                        <Searchbar
+                                            selectedTags={selectedTags}
+                                            setSelectedTags={setSelectedTags}
+                                        />
                                     </div>
-                                    <div className="flex items-center justify-between mb-4 ps-6">
-                                        <div className="flex items-center gap-2">
-                                            <Searchbar
-                                                selectedTags={selectedTags}
-                                                setSelectedTags={
-                                                    setSelectedTags
-                                                }
-                                            />
-                                        </div>
-                                        {/* {currentIssue ? (
+                                    {/* {currentIssue ? (
                                 <button
                                     className="mt-6"
                                     onClick={() => setCurrentIssue(null)}
@@ -425,17 +405,17 @@ export default function Page() {
                                     />
                                 </div>
                             )} */}
-                                    </div>
-                                    <div className="grid gap-4 p-6 overflow-y-auto">
-                                        {filteredIssues &&
-                                            filteredIssues.map((issue) => (
-                                                <IssueCard
-                                                    key={issue._id}
-                                                    issue={issue}
-                                                    setAllIssues={setAllIssues}
-                                                />
-                                            ))}
-                                        {/* {currentIssue ? (
+                                </div>
+                                <div className="grid gap-4 p-6 overflow-y-auto">
+                                    {filteredIssues &&
+                                        filteredIssues.map((issue) => (
+                                            <IssueCard
+                                                key={issue._id}
+                                                issue={issue}
+                                                setAllIssues={setAllIssues}
+                                            />
+                                        ))}
+                                    {/* {currentIssue ? (
                                 <DiscussionSection currentIssue={currentIssue}>
                                     {currentComments.map((comment) => (
                                         <DiscussionCard
@@ -484,42 +464,33 @@ export default function Page() {
                                         ))}
                                 </>
                             )} */}
+                                </div>
+                            </div>
+                        </ResizablePanel>
+                    </>
+                )}
+                {showRebuttal && (
+                    <>
+                        <ResizableHandle withHandle />
+                        <ResizablePanel defaultSize={25} minSize={20}>
+                            <div className="flex flex-col h-full">
+                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                    Rebuttal Draft
+                                </div>
+                                <div className="flex-1 p-4 overflow-auto mt-20">
+                                    <Textarea
+                                        placeholder="Type your response here..."
+                                        className="w-full min-h-[300px] rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                    />
+                                    <div className="flex justify-center mt-4">
+                                        <Button>Generate Outline</Button>
                                     </div>
                                 </div>
-                            </ResizablePanel>
-                            <ResizableHandle withHandle />
-                        </>
-                    ) : (
-                        <></>
-                    )}
-                    {showRebuttal ? (
-                        <>
-                            <ResizablePanel
-                                defaultSize={25}
-                                minSize={20}
-                                collapsible={true}
-                            >
-                                <div className="flex flex-col h-full">
-                                    <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                        Rebuttal Draft
-                                    </div>
-                                    <div className="flex-1 p-4 overflow-auto mt-20">
-                                        <Textarea
-                                            placeholder="Type your response here..."
-                                            className="w-full min-h-[300px] rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                                        />
-                                        <div className="flex justify-end mt-4">
-                                            <Button>Save</Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </ResizablePanel>
-                        </>
-                    ) : (
-                        <></>
-                    )}
-                </ResizablePanelGroup>
-            </div>
-        </>
+                            </div>
+                        </ResizablePanel>
+                    </>
+                )}
+            </ResizablePanelGroup>
+        </div>
     );
 }

@@ -73,7 +73,9 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                                     className="h-8 w-8 p-0 hover:bg-slate-200 -mr-2 -mt-3"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <span className="sr-only">Open menu</span>
+                                    {/* <span className="sr-only">
+                                        Open menu
+                                    </span> */}
                                     <DotsVerticalIcon className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>

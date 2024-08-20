@@ -9,14 +9,15 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 import { ReviewHighlight } from "./ReviewHighlight";
 
 import { Issue } from "@/app/page";
 // import getXPath from "get-xpath";
 import { computeXPath } from "compute-XPath";
+import { MagicWandIcon } from "@radix-ui/react-icons";
+import { Separator } from "@/components/ui/separator";
 
 type ReviewHighlightTooltipProps = {
     scrollContainer: HTMLElement | null;
@@ -65,7 +66,9 @@ export function ReviewHighlightTooltip({
     const [showForm, setShowForm] = useState<boolean>(false);
     const [newIssue, setNewIssue] = useState<Issue | EmptyIssue>(emptyIssue);
     const [selection, setSelection] = useState<Range>();
-    const [position, setPosition] = useState<Record<string, number>>();
+    const [tooltipPosition, setTooltipPosition] =
+        useState<Record<string, number>>();
+    const [formPosition, setFormPosition] = useState<Record<string, number>>();
 
     function selectionInReviews(node: Node | HTMLElement | null) {
         let currentNode = node;
@@ -114,17 +117,31 @@ export function ReviewHighlightTooltip({
             ) {
                 setSelection(selectedRange);
                 const tooltipRect = selectedRange.getBoundingClientRect();
-                setPosition({
+                setTooltipPosition({
                     x:
                         tooltipRect.left -
                         ((scrollContainerLeft ?? 0) + 16) +
                         tooltipRect.width / 2 -
-                        80 / 2,
+                        60 / 2,
                     y:
                         tooltipRect.top -
-                        80 +
+                        (scrollContainer?.getBoundingClientRect().y ?? 0) +
                         (scrollContainer?.scrollTop ?? 0) -
-                        52.8,
+                        30,
+                    width: tooltipRect.width,
+                    height: tooltipRect.height,
+                });
+                setFormPosition({
+                    x:
+                        tooltipRect.left -
+                        ((scrollContainerLeft ?? 0) + 16) +
+                        tooltipRect.width / 2 -
+                        180 / 2,
+                    y:
+                        tooltipRect.top -
+                        (scrollContainer?.getBoundingClientRect().y ?? 0) +
+                        tooltipRect.height +
+                        (scrollContainer?.scrollTop ?? 0),
                     width: tooltipRect.width,
                     height: tooltipRect.height,
                 });
@@ -230,35 +247,42 @@ export function ReviewHighlightTooltip({
                             issueId=""
                         />
                     ))}
-            {showTooltip && position && (
+            {showTooltip && tooltipPosition && (
                 <div
-                    className="
-                    absolute z-10 -top-2 left-0 w-[80px] h-[30px] bg-black text-white rounded m-0
-                    after:absolute after:top-full after:left-1/2 after:-translate-x-2 after:h-0 after:w-0 after:border-x-[6px] after:border-x-transparent after:border-b-[8px] after:border-b-black after:rotate-180
-                  "
+                    className="absolute z-10 -top-2 left-0 bg-black text-white rounded m-0 flex gap-2 items-center justify-center"
                     style={{
-                        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+                        transform: `translate3d(${tooltipPosition.x}px, ${tooltipPosition.y}px, 0)`,
                     }}
                 >
                     <button
-                        className="flex w-full h-full justify-between items-center px-2"
+                        className="flex w-full h-full justify-between items-center rounded p-2 hover:bg-gray-700"
                         onClick={() => {
                             setShowForm(true);
                             setShowTooltip(false);
                         }}
                     >
                         <span id="new-issue" className="text-xs">
-                            New Issue
+                            Add Note
                         </span>
+                    </button>
+                    <Separator orientation="vertical" className="h-4" />
+                    <button
+                        className="p-2 pr-3 rounded  hover:bg-gray-700"
+                        onClick={() => {
+                            setShowForm(true);
+                            setShowTooltip(false);
+                        }}
+                    >
+                        <MagicWandIcon className="h-4 w-4" />
                     </button>
                 </div>
             )}
 
-            {showForm && position && (
+            {showForm && formPosition && (
                 <div
                     className="bg-background p-4 rounded-md shadow-md absolute z-10"
                     style={{
-                        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+                        transform: `translate3d(${formPosition.x}px, ${formPosition.y}px, 0)`,
                     }}
                 >
                     <form
@@ -268,14 +292,14 @@ export function ReviewHighlightTooltip({
                             createNewHighlight();
                         }}
                     >
-                        <div className="grid gap-4 py-4">
+                        <div className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="comment">Comment</Label>
                                 <Textarea
                                     required
+                                    className="min-h-[30px]"
                                     id="comment"
-                                    placeholder="Enter your comment"
-                                    rows={4}
+                                    placeholder="Add a comment..."
+                                    rows={1}
                                     value={newIssue.comment}
                                     onChange={(e) =>
                                         setNewIssue({
