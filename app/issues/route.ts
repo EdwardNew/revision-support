@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "./mongobd";
+import clientPromise from "@/lib/mongobd";
 import { ObjectId } from "mongodb";
 
 const databaseName = "revision_support";

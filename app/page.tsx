@@ -78,12 +78,12 @@ export default function Page() {
     const [reviews, setReviews] = useState<Array<Review>>([]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/papers")
+        fetch("http://localhost:3000/papers")
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
-                setReviews(data[0].reviews);
+                setReviews(data.items[0].reviews);
             });
     }, []);
 
