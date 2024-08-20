@@ -247,7 +247,7 @@ export function ReviewHighlightTooltip({
                         }}
                     >
                         <div className="grid gap-4 py-4">
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="title">Title</Label>
                                 <Input
                                     required
@@ -261,7 +261,7 @@ export function ReviewHighlightTooltip({
                                         })
                                     }
                                 />
-                            </div>
+                            </div> */}
                             <div className="grid gap-2">
                                 <Label htmlFor="comment">Comment</Label>
                                 <Textarea
