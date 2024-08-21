@@ -16,7 +16,7 @@ import { ReviewHighlight } from "./ReviewHighlight";
 import { Issue } from "@/app/page";
 // import getXPath from "get-xpath";
 import { computeXPath } from "compute-XPath";
-import { MagicWandIcon } from "@radix-ui/react-icons";
+import { CheckCircledIcon, MagicWandIcon } from "@radix-ui/react-icons";
 import { Separator } from "@/components/ui/separator";
 
 type ReviewHighlightTooltipProps = {
@@ -155,6 +155,7 @@ export function ReviewHighlightTooltip({
             }
             setShowTooltip(false);
             setShowForm(false);
+            setChatStrategies("");
             setNewIssue(emptyIssue);
             setSelection(undefined);
         }
@@ -219,6 +220,31 @@ export function ReviewHighlightTooltip({
         setShowForm(false);
     }
 
+    const [chatStrategies, setChatStrategies] = useState<string>("");
+
+    async function fetchChatStrategies(prompt: string) {
+        const response = await fetch("http://localhost:3000/gpt", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompt }),
+        });
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let result = "";
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            result += decoder.decode(value, { stream: true });
+            setChatStrategies(result);
+        }
+
+        console.log("Final result:", result);
+    }
+
     return (
         <>
             {selection &&
@@ -265,7 +291,7 @@ export function ReviewHighlightTooltip({
                             Add Note
                         </span>
                     </button>
-                    <Separator orientation="vertical" className="h-4" />
+                    {/* <Separator orientation="vertical" className="h-4" />
                     <button
                         className="p-2 pr-3 rounded  hover:bg-gray-700"
                         onClick={() => {
@@ -274,13 +300,13 @@ export function ReviewHighlightTooltip({
                         }}
                     >
                         <MagicWandIcon className="h-4 w-4" />
-                    </button>
+                    </button> */}
                 </div>
             )}
 
             {showForm && formPosition && (
                 <div
-                    className="bg-background p-4 rounded-md shadow-md absolute z-10"
+                    className="bg-background p-4 rounded-md shadow-md absolute z-10 max-w-[350px]"
                     style={{
                         transform: `translate3d(${formPosition.x}px, ${formPosition.y}px, 0)`,
                     }}
@@ -293,7 +319,8 @@ export function ReviewHighlightTooltip({
                         }}
                     >
                         <div className="grid gap-4">
-                            <div className="grid gap-2">
+                            <div className="text-xs">{chatStrategies}</div>
+                            <div className="flex gap-2">
                                 <Textarea
                                     required
                                     className="min-h-[30px]"
@@ -308,8 +335,54 @@ export function ReviewHighlightTooltip({
                                         })
                                     }
                                 />
+                                <Button
+                                    type="submit"
+                                    variant="ghost"
+                                    size="icon"
+                                >
+                                    <CheckCircledIcon className="w-5 h-5" />
+                                </Button>
                             </div>
-                            <div className="grid grid-rows-1 gap-4">
+
+                            <div className="flex justify-around gap-2">
+                                <Button
+                                    variant="outline"
+                                    className="text-xs rounded-full"
+                                    type="button"
+                                    onClick={() =>
+                                        fetchChatStrategies(
+                                            "you are a helpful ai assistant"
+                                        )
+                                    }
+                                >
+                                    Strategies
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="text-xs rounded-full"
+                                    type="button"
+                                    onClick={() =>
+                                        fetchChatStrategies(
+                                            "you are a helpful ai assistant"
+                                        )
+                                    }
+                                >
+                                    Reflection
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="text-xs rounded-full"
+                                    type="button"
+                                    onClick={() =>
+                                        fetchChatStrategies(
+                                            "you are a helpful ai assistant"
+                                        )
+                                    }
+                                >
+                                    Explaination
+                                </Button>
+                            </div>
+                            {/* <div className="grid grid-rows-1 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="tag2">Type</Label>
                                     <Select
@@ -341,11 +414,8 @@ export function ReviewHighlightTooltip({
                                         </SelectContent>
                                     </Select>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
-                        <Button type="submit" className="w-full">
-                            Save
-                        </Button>
                     </form>
                 </div>
             )}

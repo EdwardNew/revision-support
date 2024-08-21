@@ -230,7 +230,7 @@ export default function Page() {
 
     return (
         <div className="flex flex-col h-screen">
-            <div className="flex justify-evenly p-5 ">
+            <div className="flex justify-evenly p-2 ">
                 <Button
                     variant="outline"
                     className={`${showPDF ? "" : panelHiddenClass}`}
@@ -280,7 +280,7 @@ export default function Page() {
                     <>
                         <ResizablePanel defaultSize={35} minSize={20}>
                             <div className="flex flex-col h-full">
-                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     PDF Viewer
                                 </div>
                                 <div className="h-full">
@@ -304,16 +304,16 @@ export default function Page() {
                             }}
                         >
                             <div className="flex flex-col h-full">
-                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     Reviews
                                 </div>
                                 <div className="flex items-center justify-between bg-card rounded-t-lg px-4 py-2 border-b border-muted">
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-4 rounded-full">
                                         {reviews.length > 0 &&
                                             reviews.map((review) => {
                                                 return (
                                                     <Button
-                                                        className="text-xs"
+                                                        className="text-xs rounded-full py-1 px-3"
                                                         key={`${review.reviewer}-btn`}
                                                         onClick={() => {
                                                             document
@@ -380,7 +380,7 @@ export default function Page() {
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={25} minSize={20}>
                             <div className="flex flex-col h-full">
-                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     Notes
                                 </div>
                                 <div className="flex items-center justify-between mb-4 ps-6">
@@ -474,7 +474,7 @@ export default function Page() {
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={25} minSize={20}>
                             <div className="flex flex-col h-full">
-                                <div className="bg-secondary text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     Rebuttal Draft
                                 </div>
                                 <div className="flex-1 p-4 overflow-auto mt-20">
