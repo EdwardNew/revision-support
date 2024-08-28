@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircledIcon } from "@radix-ui/react-icons";
+import { LoaderCircle } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { computeXPath } from "compute-XPath";
@@ -112,6 +113,9 @@ export function NewNoteForm({
     const [gptResponseType, setGptResponseType] = useState<
         keyof GptResponseMap | null
     >(null);
+    const [loadingResponseType, setLoadingResponseType] = useState<
+        keyof GptResponseMap | null
+    >(null);
     const noteTextarea = useRef<HTMLTextAreaElement>(null);
 
     function getReviewer(node: Node | HTMLElement | null) {
@@ -185,8 +189,7 @@ export function NewNoteForm({
         if (!selection) {
             return;
         }
-        setGptResponse(null);
-        setGptResponseType(null);
+        setLoadingResponseType(responseType);
 
         // WARNING for future Edward: this is hardcoding the id for reviews, if the id strucutre changes, this will break
         const reviewer = getReviewer(selection?.startContainer).split(
@@ -222,7 +225,10 @@ export function NewNoteForm({
             }
         );
 
-        const strategies = await response.json();
+        const strategies = await response.json().finally(() => {
+            setGptResponseType(responseType);
+            setLoadingResponseType(null);
+        });
 
         // const reader = response.body?.getReader();
         // const decoder = new TextDecoder();
@@ -234,8 +240,6 @@ export function NewNoteForm({
         //     result += decoder.decode(value, { stream: true });
         //     setChatStrategies(result);
         // }
-
-        setGptResponseType(responseType);
 
         if (responseType === "explain") {
             setGptResponse(strategies);
@@ -317,6 +321,9 @@ export function NewNoteForm({
                             onClick={() => fetchChatResponse("strategize")}
                         >
                             Strategize
+                            {loadingResponseType === "strategize" && (
+                                <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                            )}
                         </Button>
                         <Button
                             variant="outline"
@@ -325,6 +332,9 @@ export function NewNoteForm({
                             onClick={() => fetchChatResponse("reflect")}
                         >
                             Reflect
+                            {loadingResponseType === "reflect" && (
+                                <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                            )}
                         </Button>
                         <Button
                             variant="outline"
@@ -333,6 +343,9 @@ export function NewNoteForm({
                             onClick={() => fetchChatResponse("explain")}
                         >
                             Explain
+                            {loadingResponseType === "explain" && (
+                                <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                            )}
                         </Button>
                     </div>
                     <form

@@ -117,10 +117,6 @@ export default function Page() {
         status: [],
     });
 
-    useEffect(() => {
-        console.log(issuesId);
-    }, [issuesId]);
-
     const [allIssues, setAllIssues] = useState<Array<Issue>>([]);
     const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
 
@@ -224,14 +220,8 @@ export default function Page() {
         scrollContainer.current = document.getElementById("scroll-container");
     }, []);
 
-    // useEffect(() => {
-    //     console.log(reviewHighlights);
-    // }, [reviewHighlights]);
-
     useEffect(() => {
         handleResize(filteredIssues);
-        console.log("filterd issues:", filteredIssues);
-        console.log("filterd issues updated", reviewHighlights);
 
         function onResize() {
             handleResize(filteredIssues);
