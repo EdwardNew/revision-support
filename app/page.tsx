@@ -23,7 +23,9 @@ import { IssueCard } from "@/components/IssueCard";
 
 import { useState, useEffect, useRef } from "react";
 
-type Review = {
+import { GptResponseMap } from "@/components/NewNoteForm";
+
+export type Review = {
     reviewer: string;
     content: object;
 };
@@ -31,6 +33,8 @@ type Review = {
 export type Issue = {
     _id: string;
     comment: string;
+    gptResponseType?: keyof GptResponseMap;
+    gptResponse?: { string: string } | string;
     tags: {
         reviewer: string;
         type: string;
@@ -63,6 +67,14 @@ export type Tags = {
     status: string[];
 };
 
+type TodoActionItem = {
+    [actionDescription: string]: string[];
+};
+
+type TodoTopic = {
+    [topicHeader: string]: TodoActionItem[];
+};
+
 // export type DiscussionComment = {
 //     content: string;
 //     author: string;
@@ -71,19 +83,30 @@ export type Tags = {
 
 import type { IHighlight } from "react-pdf-highlighter";
 
+export const paperId = "66c8372c08c1a23625adf7ea";
+
 export default function Page() {
     const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
 
     // get and store peer review data
+    const [paperTitle, setPaperTitle] = useState<string>("");
+    const [paperAbstract, setPaperAbstract] = useState<string>("");
+    const [paperPdfUrl, setPaperPdfUrl] = useState<string>("");
+    const [paperPdfBlob, setPaperPdfBlob] = useState<Blob | null>(null);
     const [reviews, setReviews] = useState<Array<Review>>([]);
+    const [issuesId, setIssuesId] = useState<string>("");
 
     useEffect(() => {
-        fetch("http://localhost:3000/papers")
+        fetch(`http://localhost:3000/papers/${paperId}`)
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
-                setReviews(data.items[0].reviews);
+                setPaperTitle(data.items.title);
+                setPaperAbstract(data.items.abstract);
+                setPaperPdfUrl(data.items.pdf);
+                setReviews(data.items.reviews);
+                setIssuesId(data.items.issues_id);
             });
     }, []);
 
@@ -94,18 +117,25 @@ export default function Page() {
         status: [],
     });
 
+    useEffect(() => {
+        console.log(issuesId);
+    }, [issuesId]);
+
     const [allIssues, setAllIssues] = useState<Array<Issue>>([]);
     const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
 
     useEffect(() => {
-        fetch("http://localhost:3000/issues")
+        if (!issuesId) {
+            return;
+        }
+        fetch(`http://localhost:3000/issues/${issuesId}`)
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
-                setAllIssues(data.items);
+                setAllIssues(data.items.notes);
             });
-    }, []);
+    }, [issuesId]);
 
     useEffect(() => {
         const allSelectedTags = Object.values(selectedTags).flat();
@@ -147,11 +177,17 @@ export default function Page() {
                 ).singleNodeValue?.childNodes[0];
 
                 if (!(startElement && endElement)) {
+                    console.log("Element not found:", {
+                        startElement,
+                        endElement,
+                    });
                     return;
                 }
 
                 newRange.setStart(startElement, highlight.startOffset);
                 newRange.setEnd(endElement, highlight.endOffset);
+
+                console.log("handle resize run!");
 
                 return {
                     issueId: issue._id,
@@ -169,8 +205,8 @@ export default function Page() {
                             // return true;
 
                             const reviewContainerWidth = document
-                                .getElementById("reviewer 1")
-                                ?.children[0]?.getBoundingClientRect().width;
+                                .getElementById("scroll-container")
+                                ?.children[1]?.getBoundingClientRect().width;
                             return rect.width < (reviewContainerWidth ?? 0);
                         }
                     ),
@@ -188,8 +224,14 @@ export default function Page() {
         scrollContainer.current = document.getElementById("scroll-container");
     }, []);
 
+    // useEffect(() => {
+    //     console.log(reviewHighlights);
+    // }, [reviewHighlights]);
+
     useEffect(() => {
         handleResize(filteredIssues);
+        console.log("filterd issues:", filteredIssues);
+        console.log("filterd issues updated", reviewHighlights);
 
         function onResize() {
             handleResize(filteredIssues);
@@ -226,14 +268,48 @@ export default function Page() {
     const [showReviews, setShowReviews] = useState<boolean>(true);
     const [showNotes, setShowNotes] = useState<boolean>(true);
     const [showRebuttal, setShowRebuttal] = useState<boolean>(false);
-    const panelHiddenClass = "bg-slate-300";
+    const panelActiveClass = "bg-slate-200";
+
+    const [notesSummary, setNotesSummary] = useState<Array<TodoTopic>>([]);
+
+    async function generateNotesSummary() {
+        const allNotes = allIssues.map((issue) => ({
+            id: issue._id,
+            note: issue.comment,
+            reviewContext: issue.highlight.text,
+        }));
+        const requestBody = {
+            paperTitle: paperTitle,
+            paperAbstract: paperAbstract,
+            // allReviews: reviews,
+            allNotes: allNotes,
+        };
+
+        console.log(requestBody);
+
+        const response = await fetch("http://localhost:3000/gpt/summary", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        const summary = await response.json();
+
+        console.log(summary);
+
+        setNotesSummary(JSON.parse(summary));
+    }
 
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex justify-evenly p-2 ">
+        <div className="flex flex-col h-screen items-center">
+            <div className="flex justify-between p-2 w-1/2 min-w-[450px]">
                 <Button
                     variant="outline"
-                    className={`${showPDF ? "" : panelHiddenClass}`}
+                    className={`rounded-full border-slate-600 ${
+                        showPDF ? panelActiveClass : ""
+                    }`}
                     onClick={() => {
                         showPDF ? setShowPDF(false) : setShowPDF(true);
                     }}
@@ -242,7 +318,9 @@ export default function Page() {
                 </Button>
                 <Button
                     variant="outline"
-                    className={`${showReviews ? "" : panelHiddenClass}`}
+                    className={`rounded-full border-slate-600 ${
+                        showReviews ? panelActiveClass : ""
+                    }`}
                     onClick={() => {
                         showReviews
                             ? setShowReviews(false)
@@ -253,7 +331,9 @@ export default function Page() {
                 </Button>
                 <Button
                     variant="outline"
-                    className={`${showNotes ? "" : panelHiddenClass}`}
+                    className={`rounded-full border-slate-600 ${
+                        showNotes ? panelActiveClass : ""
+                    }`}
                     onClick={() => {
                         showNotes ? setShowNotes(false) : setShowNotes(true);
                     }}
@@ -262,7 +342,9 @@ export default function Page() {
                 </Button>
                 <Button
                     variant="outline"
-                    className={`${showRebuttal ? "" : panelHiddenClass}`}
+                    className={`rounded-full border-slate-600 ${
+                        showRebuttal ? panelActiveClass : ""
+                    }`}
                     onClick={() => {
                         showRebuttal
                             ? setShowRebuttal(false)
@@ -278,7 +360,12 @@ export default function Page() {
             >
                 {showPDF && (
                     <>
-                        <ResizablePanel defaultSize={35} minSize={20}>
+                        <ResizablePanel
+                            id={"pdf"}
+                            order={1}
+                            defaultSize={30}
+                            minSize={20}
+                        >
                             <div className="flex flex-col h-full">
                                 <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     PDF Viewer
@@ -295,8 +382,10 @@ export default function Page() {
                 )}
                 {showReviews && (
                     <>
-                        <ResizableHandle withHandle />
+                        {showPDF && <ResizableHandle withHandle />}
                         <ResizablePanel
+                            id={"reviews"}
+                            order={2}
                             defaultSize={40}
                             minSize={20}
                             onResize={(size) => {
@@ -308,17 +397,18 @@ export default function Page() {
                                     Reviews
                                 </div>
                                 <div className="flex items-center justify-between bg-card rounded-t-lg px-4 py-2 border-b border-muted">
-                                    <div className="flex items-center gap-4 rounded-full">
+                                    <div className="flex items-center gap-2 rounded-full border border-gray-300 p-1">
                                         {reviews.length > 0 &&
                                             reviews.map((review) => {
                                                 return (
                                                     <Button
-                                                        className="text-xs rounded-full py-1 px-3"
+                                                        className="text-xs rounded-full border-none shadow-none py-1 px-3 h-5"
                                                         key={`${review.reviewer}-btn`}
                                                         onClick={() => {
                                                             document
                                                                 .getElementById(
-                                                                    review.reviewer
+                                                                    "reviewer-" +
+                                                                        review.reviewer
                                                                 )
                                                                 ?.scrollIntoView(
                                                                     {
@@ -341,10 +431,15 @@ export default function Page() {
                                 >
                                     <div id="scroll-container-top-marker"></div>
                                     <ReviewHighlightTooltip
+                                        reviewPanelSize={reviewsPanelSize}
                                         scrollContainer={
                                             scrollContainer.current
                                         }
+                                        issuesId={issuesId}
                                         setAllIssues={setAllIssues}
+                                        paperTitle={paperTitle}
+                                        paperAbstract={paperAbstract}
+                                        reviews={reviews}
                                     />
                                     {reviews.length > 0 &&
                                         reviews.map((review) => {
@@ -377,20 +472,47 @@ export default function Page() {
 
                 {showNotes && (
                     <>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel defaultSize={25} minSize={20}>
+                        {(showPDF || showReviews) && (
+                            <ResizableHandle withHandle />
+                        )}
+                        <ResizablePanel
+                            id={"notes"}
+                            order={3}
+                            defaultSize={30}
+                            minSize={20}
+                        >
                             <div className="flex flex-col h-full">
                                 <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     Notes
                                 </div>
-                                <div className="flex items-center justify-between mb-4 ps-6">
+                                <div className="grid gap-4 p-6 overflow-y-auto">
+                                    {filteredIssues &&
+                                        filteredIssues.map((issue) => (
+                                            <IssueCard
+                                                key={issue._id}
+                                                issue={issue}
+                                                issuesId={issuesId}
+                                                setAllIssues={setAllIssues}
+                                            />
+                                        ))}
+                                    <Button
+                                        onClick={() => {
+                                            setShowRebuttal(true);
+                                            generateNotesSummary();
+                                        }}
+                                    >
+                                        Summarize Notes
+                                    </Button>
+                                </div>
+                            </div>
+                            {/* <div className="flex items-center justify-between mb-4 ps-6">
                                     <div className="flex items-center gap-2">
                                         <Searchbar
                                             selectedTags={selectedTags}
                                             setSelectedTags={setSelectedTags}
                                         />
                                     </div>
-                                    {/* {currentIssue ? (
+                                    {currentIssue ? (
                                 <button
                                     className="mt-6"
                                     onClick={() => setCurrentIssue(null)}
@@ -404,18 +526,9 @@ export default function Page() {
                                         setSelectedTags={setSelectedTags}
                                     />
                                 </div>
-                            )} */}
-                                </div>
-                                <div className="grid gap-4 p-6 overflow-y-auto">
-                                    {filteredIssues &&
-                                        filteredIssues.map((issue) => (
-                                            <IssueCard
-                                                key={issue._id}
-                                                issue={issue}
-                                                setAllIssues={setAllIssues}
-                                            />
-                                        ))}
-                                    {/* {currentIssue ? (
+                            )}
+                                </div> */}
+                            {/* {currentIssue ? (
                                 <DiscussionSection currentIssue={currentIssue}>
                                     {currentComments.map((comment) => (
                                         <DiscussionCard
@@ -464,26 +577,75 @@ export default function Page() {
                                         ))}
                                 </>
                             )} */}
-                                </div>
-                            </div>
                         </ResizablePanel>
                     </>
                 )}
                 {showRebuttal && (
                     <>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel defaultSize={25} minSize={20}>
+                        {(showPDF || showReviews || showNotes) && (
+                            <ResizableHandle withHandle />
+                        )}
+                        <ResizablePanel
+                            id={"rebuttal"}
+                            order={4}
+                            defaultSize={25}
+                            minSize={20}
+                        >
                             <div className="flex flex-col h-full">
                                 <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                    Rebuttal Draft
+                                    Todo List
                                 </div>
-                                <div className="flex-1 p-4 overflow-auto mt-20">
-                                    <Textarea
-                                        placeholder="Type your response here..."
-                                        className="w-full min-h-[300px] rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                                    />
+                                <div className="flex-1 p-4 overflow-y-auto">
+                                    <ul className="list-disc list-inside">
+                                        {notesSummary.map((topicObject) => {
+                                            const topic =
+                                                Object.keys(topicObject)[0];
+                                            const actionItems =
+                                                topicObject[topic];
+                                            return (
+                                                <li>
+                                                    {topic}
+                                                    <ul>
+                                                        {actionItems.map(
+                                                            (
+                                                                actionItemObject
+                                                            ) => {
+                                                                const actionItem =
+                                                                    Object.keys(
+                                                                        actionItemObject
+                                                                    )[0];
+                                                                const noteIds =
+                                                                    actionItemObject[
+                                                                        actionItem
+                                                                    ];
+                                                                return (
+                                                                    <li>
+                                                                        {
+                                                                            actionItem
+                                                                        }
+                                                                    </li>
+                                                                );
+                                                            }
+                                                        )}
+                                                    </ul>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
                                     <div className="flex justify-center mt-4">
                                         <Button>Generate Outline</Button>
+                                    </div>
+                                </div>
+                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                    Rebuttal Outline
+                                </div>
+                                <div className="flex-1 p-4 overflow-y-auto">
+                                    <Textarea
+                                        placeholder="Type your response here..."
+                                        className="w-full h-5/6 rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                    />
+                                    <div className="flex justify-center mt-4">
+                                        {/* <Button>Generate Outline</Button> */}
                                     </div>
                                 </div>
                             </div>

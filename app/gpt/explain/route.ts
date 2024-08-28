@@ -3,15 +3,8 @@ import OpenAI from "openai";
 
 const openai = new OpenAI();
 
-const example = JSON.stringify({
-    "Add Theoretical Explanation":
-        "Introduce a brief theoretical section explaining why BoT's iterative error analysis improves performance, linking it to existing ML theories.",
-    "Expand Experimental Discussion":
-        "Provide a concise analysis of experimental results, highlighting how specific components of BoT contribute to its effectiveness.",
-});
-
 export async function POST(req: Request) {
-    const { paperTitle, paperAbstract, highlightContent, reviewContent } =
+    const { paperTitle, paperAbstract, exactHighlightContent } =
         await req.json();
 
     const prompt: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
@@ -21,15 +14,7 @@ export async function POST(req: Request) {
         },
         {
             role: "user",
-            content: `I received the following review: ${reviewContent}`,
-        },
-        {
-            role: "user",
-            content: `Please provide two concrete and constructive strategies to solve this concern: ${highlightContent}`,
-        },
-        {
-            role: "user",
-            content: `Please output the strategies in a single JSON object with the following format where strategy titles are keys and associated strategies are values. Only include the JSON object, do NOT include any formatting: ${example}`,
+            content: `Explain what the following snippet means in a concise 1-2 sentence reponse: ${exactHighlightContent}`,
         },
     ];
 
@@ -55,8 +40,4 @@ export async function POST(req: Request) {
     //     headers: { "Content-Type": "text/event-stream" },
     // });
     return NextResponse.json(completion);
-}
-
-export async function GET(req: Request) {
-    return new NextResponse("GPT");
 }

@@ -18,7 +18,7 @@ export const ReviewHighlight = React.memo(
         return (
             <div
                 key={`${rect.x}-x-${rect.y}-y`}
-                className="bg-yellow-600/50 absolute hover:cursor-pointer"
+                className="bg-yellow-200 mix-blend-multiply absolute hover:cursor-pointer"
                 style={{
                     left: `${rect.x - (scrollContainerLeft ?? 0) + 16}px`,
                     top: `${

@@ -26,19 +26,22 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 
 import type { Issue } from "@/app/page";
+import { gptResponseMap } from "./NewNoteForm";
 
 import { DeleteIssueDialog } from "@/components/DeleteIssueDialog";
 import { useState } from "react";
 
 type IssueCardProps = {
     issue: Issue;
+    issuesId: string;
     setAllIssues: React.Dispatch<React.SetStateAction<Array<Issue>>>;
 };
 
-export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
+export function IssueCard({ issue, issuesId, setAllIssues }: IssueCardProps) {
     const [showDeleteIssue, setShowDeleteIssue] = useState<boolean>(false);
     const [showEdit, setShowEdit] = useState<boolean>(false);
     const [newComment, setNewComment] = useState<string>(issue.comment);
+    const [showMore, setShowMore] = useState<boolean>(false);
 
     return (
         <>
@@ -46,7 +49,6 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                 id={issue._id}
                 onClick={() => {
                     // setCurrentIssue(issue);
-
                     const highlight = document.evaluate(
                         issue.highlight.startElementXPath,
                         document,
@@ -59,13 +61,71 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                         });
                     }
                 }}
-                className="hover: cursor-pointer hover:bg-slate-100"
+                className="hover: cursor-pointer hover:bg-slate-100 p-1 rounded-md"
             >
-                <CardHeader className="py-5">
+                <CardHeader className="p-2">
                     <div className="flex justify-between">
-                        <p className="text-muted-foreground bg-yellow-200 text-xs mr-8">
-                            {`"${issue.highlight.text}"`}
-                        </p>
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="bg-yellow-200 h-full min-w-1"></span>
+                                <p className="text-muted-foreground text-xs mr-8 line-clamp-3">
+                                    {`"${issue.highlight.text}"`}
+                                </p>
+                            </div>
+                            {issue.gptResponse && issue.gptResponseType && (
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className={`${
+                                            issue.gptResponseType
+                                                ? gptResponseMap[
+                                                      issue.gptResponseType
+                                                  ].bg
+                                                : ""
+                                        } h-full min-w-1 bg-opacity-60`}
+                                    ></span>
+                                    {typeof issue.gptResponse === "string" ? (
+                                        <p
+                                            className={`
+                                            ${
+                                                showMore ? "" : "line-clamp-2"
+                                            } text-muted-foreground text-xs
+                                        `}
+                                        >
+                                            {issue.gptResponse}
+                                        </p>
+                                    ) : (
+                                        <ul
+                                            className={`text-muted-foreground text-xs mr-8 ${
+                                                showMore
+                                                    ? "list-disc list-inside"
+                                                    : ""
+                                            }`}
+                                        >
+                                            {Object.entries(
+                                                issue.gptResponse
+                                            ).map(
+                                                ([header, strategy], index) => {
+                                                    return (
+                                                        <li
+                                                            key={`GPT-strategy-${index}`}
+                                                            className={`
+                     ${showMore ? "" : "line-clamp-2"} pt-1
+                 `}
+                                                        >
+                                                            <em className="font-semibold not-italic">
+                                                                {`${header}: `}
+                                                            </em>
+                                                            {strategy}
+                                                        </li>
+                                                    );
+                                                }
+                                            )}
+                                        </ul>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -110,7 +170,7 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                         </DropdownMenu>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-2">
                     {showEdit ? (
                         <div className="flex items-center gap-10">
                             <Textarea
@@ -153,12 +213,12 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                                                     return prevIssue;
                                                 });
                                             fetch(
-                                                `http://localhost:3000/issues?id=${issue._id}`,
+                                                `http://localhost:3000/issues/${issuesId}?id=${issue._id}`,
                                                 {
                                                     method: "PATCH",
-                                                    body: JSON.stringify({
-                                                        comment: newComment,
-                                                    }),
+                                                    body: JSON.stringify(
+                                                        newComment
+                                                    ),
                                                 }
                                             );
                                             return updatedIssues;
@@ -171,12 +231,12 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                             </div>
                         </div>
                     ) : (
-                        <p className="text-sm font-medium pb-2 pl-1">
+                        <p className="text-sm font-medium pl-1">
                             {issue.comment}
                         </p>
                     )}
 
-                    <div className="flex items-center gap-2 mt-2">
+                    {/* <div className="flex items-center gap-2 mt-2">
                         {Object.entries(issue.tags).map(
                             ([tagCategory, tag]) => (
                                 <Badge
@@ -188,16 +248,41 @@ export function IssueCard({ issue, setAllIssues }: IssueCardProps) {
                                 </Badge>
                             )
                         )}
-                    </div>
+                    </div> */}
                 </CardContent>
-                <CardFooter className="pb-4 text-xs text-muted-foreground">
-                    Last Edited at {issue.timestamp}
-                </CardFooter>
+                {issue.gptResponse && issue.gptResponseType && (
+                    <CardFooter className="p-2 pt-0 flex justify-end">
+                        {showMore ? (
+                            <Button
+                                variant="link"
+                                className="p-0 pl-1 text-xs text-muted-foreground h-4"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMore(false);
+                                }}
+                            >
+                                show less
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="link"
+                                className="p-0 pl-1 text-xs text-muted-foreground h-4"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMore(true);
+                                }}
+                            >
+                                show more
+                            </Button>
+                        )}
+                    </CardFooter>
+                )}
             </Card>
 
             {showDeleteIssue && (
                 <DeleteIssueDialog
-                    issueId={issue._id}
+                    issuesId={issuesId}
+                    noteId={issue._id}
                     setShowDeleteIssue={setShowDeleteIssue}
                     setAllIssues={setAllIssues}
                 />

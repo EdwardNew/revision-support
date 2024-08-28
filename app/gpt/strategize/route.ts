@@ -56,7 +56,3 @@ export async function POST(req: Request) {
     // });
     return NextResponse.json(completion);
 }
-
-export async function GET(req: Request) {
-    return new NextResponse("GPT");
-}

@@ -12,27 +12,29 @@ import type { Issue } from "@/app/page";
 import { useRef } from "react";
 
 type DeleteIssueDialogProps = {
-    issueId: string;
+    issuesId: string;
+    noteId: string;
     setShowDeleteIssue: React.Dispatch<React.SetStateAction<boolean>>;
     setAllIssues: React.Dispatch<React.SetStateAction<Array<Issue>>>;
 };
 
 export function DeleteIssueDialog({
-    issueId,
+    issuesId,
+    noteId,
     setShowDeleteIssue,
     setAllIssues,
 }: DeleteIssueDialogProps) {
     const cancelBtn = useRef<HTMLButtonElement | null>(null);
 
     function handleDeleteIssue() {
-        setAllIssues((prevIssues) => {
-            const updatedIssues = [...prevIssues].filter(
-                (issue) => issue._id !== issueId
+        setAllIssues((prevNotes) => {
+            const updatedNotes = [...prevNotes].filter(
+                (note) => note._id !== noteId
             );
-            fetch(`http://localhost:3000/issues?id=${issueId}`, {
+            fetch(`http://localhost:3000/issues/${issuesId}?id=${noteId}`, {
                 method: "DELETE",
             });
-            return updatedIssues;
+            return updatedNotes;
         });
     }
 

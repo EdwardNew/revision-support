@@ -55,15 +55,17 @@ type PdfProps = {
     setHighlights: React.Dispatch<React.SetStateAction<Array<IHighlight>>>;
 };
 
+// const paper_id = "iGffRQ9jQpQ";
+const paper_id = "qBL04XXex6";
+
 export function Pdf({ highlights, setHighlights }: PdfProps) {
     const [pdfUrl, setPdfUrl] = useState("");
-    const [pdfRawText, setPdfRawText] = useState("");
     const [shouldScroll, setShouldScroll] = useState(false);
 
     useEffect(() => {
         const fetchPdf = async () => {
             const response = await fetch(
-                "http://localhost:3000/get_pdf?paper=iGffRQ9jQpQ"
+                `http://localhost:3000/get_pdf?paper=${paper_id}`
             );
             const blob = await response.blob();
             setPdfUrl(URL.createObjectURL(blob));

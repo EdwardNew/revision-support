@@ -4,15 +4,14 @@ import OpenAI from "openai";
 const openai = new OpenAI();
 
 const example = JSON.stringify({
-    "Add Theoretical Explanation":
-        "Introduce a brief theoretical section explaining why BoT's iterative error analysis improves performance, linking it to existing ML theories.",
-    "Expand Experimental Discussion":
-        "Provide a concise analysis of experimental results, highlighting how specific components of BoT contribute to its effectiveness.",
+    Q1: "Why does BoT's iterative error analysis improve performance?",
+    Q2: "Which specific components of BoT contribute to the experimental results?",
 });
 
 export async function POST(req: Request) {
     const { paperTitle, paperAbstract, highlightContent, reviewContent } =
         await req.json();
+    // const prompt = "you are a helpful AI assistant";
 
     const prompt: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
         {
@@ -25,11 +24,11 @@ export async function POST(req: Request) {
         },
         {
             role: "user",
-            content: `Please provide two concrete and constructive strategies to solve this concern: ${highlightContent}`,
+            content: `Please provide two concrete and constructive reflection questions to for the author team to help them reflect on this concern and try to think of effective strategies to solve this concern: ${highlightContent}`,
         },
         {
             role: "user",
-            content: `Please output the strategies in a single JSON object with the following format where strategy titles are keys and associated strategies are values. Only include the JSON object, do NOT include any formatting: ${example}`,
+            content: `Please output the strategies in a single JSON object with the following format where question labels (Q1, Q2) are keys and associated questions are the values. Only include the JSON object, do NOT include any formatting: ${example}`,
         },
     ];
 
@@ -55,8 +54,4 @@ export async function POST(req: Request) {
     //     headers: { "Content-Type": "text/event-stream" },
     // });
     return NextResponse.json(completion);
-}
-
-export async function GET(req: Request) {
-    return new NextResponse("GPT");
 }
