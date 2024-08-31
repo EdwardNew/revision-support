@@ -87,7 +87,7 @@ import type { IHighlight } from "react-pdf-highlighter";
 import { todoList } from "@/app/testGeneratedTodoList";
 import { testOutline } from "@/components/TestOutline";
 
-export const paperId = "66c8372c08c1a23625adf7ea";
+const paperId: string = "66c8372c08c1a23625adf7ea";
 
 export default function Page() {
     const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
@@ -407,10 +407,10 @@ export default function Page() {
                                     PDF Viewer
                                 </div>
                                 <div className="h-full">
-                                    <Pdf
+                                    {/* <Pdf
                                         highlights={pdfHighlights}
                                         setHighlights={setPdfHighlights}
-                                    />
+                                    /> */}
                                 </div>
                             </div>
                         </ResizablePanel>

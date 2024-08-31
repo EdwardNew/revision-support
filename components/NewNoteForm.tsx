@@ -4,7 +4,7 @@ import { CheckCircledIcon } from "@radix-ui/react-icons";
 import { LoaderCircle, Sparkles } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
-import { computeXPath } from "compute-XPath";
+import { computeXPath } from "compute-xpath";
 
 import type { Issue } from "@/app/page";
 
