@@ -153,9 +153,11 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
     }
 
     const parsedContent =
-        type === "todoList"
-            ? generateTodoListJSON(rawContent)
-            : generateOutlineJSON(rawContent);
+        rawContent.length > 0
+            ? type === "todoList"
+                ? generateTodoListJSON(rawContent)
+                : generateOutlineJSON(rawContent)
+            : "";
 
     const editor = useEditor({
         extensions: extensions,
@@ -170,9 +172,11 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
     useEffect(() => {
         if (editor) {
             const newContent =
-                type === "todoList"
-                    ? generateTodoListJSON(rawContent)
-                    : generateOutlineJSON(rawContent);
+                rawContent.length > 0
+                    ? type === "todoList"
+                        ? generateTodoListJSON(rawContent)
+                        : generateOutlineJSON(rawContent)
+                    : "";
             editor.commands.setContent(newContent);
         }
     }, [rawContent, editor]);
