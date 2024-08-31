@@ -80,8 +80,8 @@ export type TodoTopic = {
 //     timestamp: string;
 // };
 
-// export const BASE_URL = "https://revision-support.vercel.app";
-export const BASE_URL = "http://localhost:3000";
+export const BASE_URL = "https://revision-support.vercel.app";
+// export const BASE_URL = "http://localhost:3000";
 
 const paperId: string = "66c8372c08c1a23625adf7ea";
 
