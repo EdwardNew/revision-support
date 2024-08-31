@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 
+import { BASE_URL } from "@/app/page";
 import type { Issue } from "@/app/page";
 import { gptResponseMap } from "./NewNoteForm";
 
@@ -213,7 +214,7 @@ export function IssueCard({ issue, issuesId, setAllIssues }: IssueCardProps) {
                                                     return prevIssue;
                                                 });
                                             fetch(
-                                                `http://localhost:3000/issues/${issuesId}?id=${issue._id}`,
+                                                `${BASE_URL}/issues/${issuesId}?id=${issue._id}`,
                                                 {
                                                     method: "PATCH",
                                                     body: JSON.stringify(

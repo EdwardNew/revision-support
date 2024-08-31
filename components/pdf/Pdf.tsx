@@ -23,6 +23,8 @@ import { testHighlights as _testHighlights } from "./test-highlights";
 
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 
+import { BASE_URL } from "@/app/page";
+
 // import "./style/App.css";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
@@ -65,7 +67,7 @@ export function Pdf({ highlights, setHighlights }: PdfProps) {
     useEffect(() => {
         const fetchPdf = async () => {
             const response = await fetch(
-                `http://localhost:3000/get_pdf?paper=${paper_id}`
+                `${BASE_URL}/get_pdf?paper=${paper_id}`
             );
             const blob = await response.blob();
             setPdfUrl(URL.createObjectURL(blob));

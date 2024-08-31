@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+import { BASE_URL } from "@/app/page";
 import type { Issue } from "@/app/page";
 import { useRef } from "react";
 
@@ -31,7 +32,7 @@ export function DeleteIssueDialog({
             const updatedNotes = [...prevNotes].filter(
                 (note) => note._id !== noteId
             );
-            fetch(`http://localhost:3000/issues/${issuesId}?id=${noteId}`, {
+            fetch(`${BASE_URL}/issues/${issuesId}?id=${noteId}`, {
                 method: "DELETE",
             });
             return updatedNotes;

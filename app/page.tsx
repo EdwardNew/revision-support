@@ -87,6 +87,8 @@ import type { IHighlight } from "react-pdf-highlighter";
 import { todoList } from "@/app/testGeneratedTodoList";
 import { testOutline } from "@/components/TestOutline";
 
+export const BASE_URL = "https://revision-support.vercel.app";
+
 const paperId: string = "66c8372c08c1a23625adf7ea";
 
 export default function Page() {
@@ -102,7 +104,7 @@ export default function Page() {
     const [rebuttalId, setRebuttalId] = useState<string>("");
 
     useEffect(() => {
-        fetch(`http://localhost:3000/papers/${paperId}`)
+        fetch(`${BASE_URL}/papers/${paperId}`)
             .then((res) => {
                 return res.json();
             })
@@ -131,7 +133,7 @@ export default function Page() {
         if (!issuesId) {
             return;
         }
-        fetch(`http://localhost:3000/issues/${issuesId}`)
+        fetch(`${BASE_URL}/issues/${issuesId}`)
             .then((res) => {
                 return res.json();
             })
@@ -293,7 +295,7 @@ export default function Page() {
 
         console.log(requestBody);
 
-        const response = await fetch("http://localhost:3000/gpt/summary", {
+        const response = await fetch(`${BASE_URL}/gpt/summary`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -323,7 +325,7 @@ export default function Page() {
 
         console.log(requestBody);
 
-        const response = await fetch("http://localhost:3000/gpt/outline", {
+        const response = await fetch(`${BASE_URL}/gpt/outline`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import { LoaderCircle, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { computeXPath } from "compute-xpath";
 
+import { BASE_URL } from "@/app/page";
 import type { Issue } from "@/app/page";
 
 type EmptyIssue = {
@@ -167,7 +168,7 @@ export function NewNoteForm({
             newIssue.gptResponseType = gptResponseType;
         }
 
-        fetch(`http://localhost:3000/issues/${issuesId}`, {
+        fetch(`${BASE_URL}/issues/${issuesId}`, {
             method: "POST",
             body: JSON.stringify(newIssue),
         })
@@ -214,16 +215,13 @@ export function NewNoteForm({
 
         console.log(requestBody);
 
-        const response = await fetch(
-            `http://localhost:3000/gpt/${responseType}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(requestBody),
-            }
-        );
+        const response = await fetch(`${BASE_URL}/gpt/${responseType}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
 
         const strategies = await response.json().finally(() => {
             setGptResponseType(responseType);
