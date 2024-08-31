@@ -11,12 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 // custom components imports
 import { Pdf } from "@/components/pdf/Pdf";
-import { Sidebar } from "@/components/pdf/Sidebar";
 import { Searchbar } from "@/components/Searchbar";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
 import { ReviewHighlightTooltip } from "@/components/ReviewHighlightTooltip";
 import { Review } from "@/components/Review";
 import { IssueCard } from "@/components/IssueCard";
+import { Tiptap } from "@/components/Tiptap";
 // import { DiscussionSection } from "@/components/DiscussionSection";
 // import { DiscussionCard } from "@/components/DisucssionCard";
 // import { DiscussionTextarea } from "@/components/DiscussionTextarea";
@@ -67,11 +67,11 @@ export type Tags = {
     status: string[];
 };
 
-type TodoActionItem = {
+export type TodoActionItem = {
     [actionDescription: string]: string[];
 };
 
-type TodoTopic = {
+export type TodoTopic = {
     [topicHeader: string]: TodoActionItem[];
 };
 
@@ -82,6 +82,10 @@ type TodoTopic = {
 // };
 
 import type { IHighlight } from "react-pdf-highlighter";
+
+// TODO: delete
+import { todoList } from "@/app/testGeneratedTodoList";
+import { testOutline } from "@/components/TestOutline";
 
 export const paperId = "66c8372c08c1a23625adf7ea";
 
@@ -95,6 +99,7 @@ export default function Page() {
     const [paperPdfBlob, setPaperPdfBlob] = useState<Blob | null>(null);
     const [reviews, setReviews] = useState<Array<Review>>([]);
     const [issuesId, setIssuesId] = useState<string>("");
+    const [rebuttalId, setRebuttalId] = useState<string>("");
 
     useEffect(() => {
         fetch(`http://localhost:3000/papers/${paperId}`)
@@ -107,6 +112,7 @@ export default function Page() {
                 setPaperPdfUrl(data.items.pdf);
                 setReviews(data.items.reviews);
                 setIssuesId(data.items.issues_id);
+                setRebuttalId(data.items.rebuttal_id);
             });
     }, []);
 
@@ -119,6 +125,7 @@ export default function Page() {
 
     const [allIssues, setAllIssues] = useState<Array<Issue>>([]);
     const [filteredIssues, setFilteredIssues] = useState<Array<Issue>>([]);
+    const [todoListIssueIds, setTodoListIssueIds] = useState<Array<string>>([]);
 
     useEffect(() => {
         if (!issuesId) {
@@ -146,6 +153,13 @@ export default function Page() {
             setFilteredIssues(filteredIssues);
         }
     }, [selectedTags, allIssues]);
+
+    useEffect(() => {
+        const filteredIssues = allIssues.filter((issue) =>
+            todoListIssueIds.includes(issue._id)
+        );
+        setFilteredIssues(filteredIssues);
+    }, [todoListIssueIds]);
 
     // handle review highlights
     const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(50);
@@ -260,7 +274,9 @@ export default function Page() {
     const [showRebuttal, setShowRebuttal] = useState<boolean>(false);
     const panelActiveClass = "bg-slate-200";
 
-    const [notesSummary, setNotesSummary] = useState<Array<TodoTopic>>([]);
+    const [notesSummary, setNotesSummary] =
+        useState<Array<TodoTopic>>(todoList);
+    const [rebuttalOutline, setRebuttalOutline] = useState(testOutline);
 
     async function generateNotesSummary() {
         const allNotes = allIssues.map((issue) => ({
@@ -290,6 +306,36 @@ export default function Page() {
         console.log(summary);
 
         setNotesSummary(JSON.parse(summary));
+    }
+
+    async function generateOutline() {
+        const allNotes = allIssues.map((issue) => ({
+            id: issue._id,
+            note: issue.comment,
+            reviewContext: issue.highlight.text,
+        }));
+        const requestBody = {
+            paperTitle: paperTitle,
+            paperAbstract: paperAbstract,
+            allNotes: allNotes,
+            todoList: todoList,
+        };
+
+        console.log(requestBody);
+
+        const response = await fetch("http://localhost:3000/gpt/outline", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        const outline = await response.json();
+
+        console.log(outline);
+
+        setRebuttalOutline(JSON.parse(outline));
     }
 
     return (
@@ -472,9 +518,20 @@ export default function Page() {
                             minSize={20}
                         >
                             <div className="flex flex-col h-full">
-                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                    Notes
+                                <div className="flex justify-between items-center mr-5">
+                                    <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                        Notes
+                                    </div>
+                                    <Button
+                                        variant="link"
+                                        onClick={() => {
+                                            setFilteredIssues(allIssues);
+                                        }}
+                                    >
+                                        show all
+                                    </Button>
                                 </div>
+
                                 <div className="grid gap-4 p-6 overflow-y-auto">
                                     {filteredIssues &&
                                         filteredIssues.map((issue) => (
@@ -581,64 +638,58 @@ export default function Page() {
                             defaultSize={25}
                             minSize={20}
                         >
-                            <div className="flex flex-col h-full">
-                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                    Todo List
-                                </div>
-                                <div className="flex-1 p-4 overflow-y-auto">
-                                    <ul className="list-disc list-inside">
-                                        {notesSummary.map((topicObject) => {
-                                            const topic =
-                                                Object.keys(topicObject)[0];
-                                            const actionItems =
-                                                topicObject[topic];
-                                            return (
-                                                <li>
-                                                    {topic}
-                                                    <ul>
-                                                        {actionItems.map(
-                                                            (
-                                                                actionItemObject
-                                                            ) => {
-                                                                const actionItem =
-                                                                    Object.keys(
-                                                                        actionItemObject
-                                                                    )[0];
-                                                                const noteIds =
-                                                                    actionItemObject[
-                                                                        actionItem
-                                                                    ];
-                                                                return (
-                                                                    <li>
-                                                                        {
-                                                                            actionItem
-                                                                        }
-                                                                    </li>
-                                                                );
-                                                            }
-                                                        )}
-                                                    </ul>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                    <div className="flex justify-center mt-4">
-                                        <Button>Generate Outline</Button>
+                            <ResizablePanelGroup direction="vertical">
+                                <ResizablePanel
+                                    collapsible={true}
+                                    minSize={10}
+                                    className="h-full"
+                                >
+                                    <div className="h-full flex flex-col">
+                                        <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                            Todo List
+                                        </div>
+                                        <div className="flex-1 px-4 overflow-y-auto">
+                                            <Tiptap
+                                                type="todoList"
+                                                rawContent={notesSummary}
+                                                setFilteredIssues={
+                                                    setTodoListIssueIds
+                                                }
+                                            />
+                                            <div className="flex justify-center mt-4">
+                                                <Button
+                                                    onClick={() =>
+                                                        generateOutline()
+                                                    }
+                                                >
+                                                    Generate Outline
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                    Rebuttal Outline
-                                </div>
-                                <div className="flex-1 p-4 overflow-y-auto">
-                                    <Textarea
-                                        placeholder="Type your response here..."
-                                        className="w-full h-5/6 rounded-md border border-input bg-background p-2 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                                    />
-                                    <div className="flex justify-center mt-4">
-                                        {/* <Button>Generate Outline</Button> */}
+                                </ResizablePanel>
+                                <ResizableHandle withHandle />
+                                <ResizablePanel
+                                    collapsible={true}
+                                    minSize={10}
+                                    className="h-full"
+                                >
+                                    <div className="h-full flex flex-col">
+                                        <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                            Rebuttal Outline
+                                        </div>
+                                        <div className="flex-1 p-4 overflow-y-auto">
+                                            <Tiptap
+                                                type="outline"
+                                                rawContent={rebuttalOutline}
+                                            />
+                                            <div className="flex justify-center mt-4">
+                                                <Button>Save Outline</Button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                </ResizablePanel>
+                            </ResizablePanelGroup>
                         </ResizablePanel>
                     </>
                 )}

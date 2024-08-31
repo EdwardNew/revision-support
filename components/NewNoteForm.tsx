@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircledIcon } from "@radix-ui/react-icons";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Sparkles } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { computeXPath } from "compute-XPath";
@@ -321,8 +321,10 @@ export function NewNoteForm({
                             onClick={() => fetchChatResponse("strategize")}
                         >
                             Strategize
-                            {loadingResponseType === "strategize" && (
+                            {loadingResponseType === "strategize" ? (
                                 <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                            ) : (
+                                <Sparkles className="ml-1 w-3 h-3" />
                             )}
                         </Button>
                         <Button
@@ -332,8 +334,10 @@ export function NewNoteForm({
                             onClick={() => fetchChatResponse("reflect")}
                         >
                             Reflect
-                            {loadingResponseType === "reflect" && (
+                            {loadingResponseType === "reflect" ? (
                                 <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                            ) : (
+                                <Sparkles className="ml-1 w-3 h-3" />
                             )}
                         </Button>
                         <Button
@@ -343,8 +347,10 @@ export function NewNoteForm({
                             onClick={() => fetchChatResponse("explain")}
                         >
                             Explain
-                            {loadingResponseType === "explain" && (
+                            {loadingResponseType === "explain" ? (
                                 <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                            ) : (
+                                <Sparkles className="ml-1 w-3 h-3" />
                             )}
                         </Button>
                     </div>

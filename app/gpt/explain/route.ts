@@ -16,6 +16,10 @@ export async function POST(req: Request) {
             role: "user",
             content: `Explain what the following snippet means in a concise 1-2 sentence reponse: ${exactHighlightContent}`,
         },
+        {
+            role: "user",
+            content: `Please also provide a link to the source if possible.`,
+        },
     ];
 
     const response = await openai.chat.completions.create({

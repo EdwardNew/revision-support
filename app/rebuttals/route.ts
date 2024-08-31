@@ -3,9 +3,9 @@ import clientPromise from "@/lib/mongobd";
 import { ObjectId } from "mongodb";
 
 const databaseName = "revision_support";
-const collectionName = "issues";
+const collectionName = "rebuttals";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const client = await clientPromise;
         const db = client.db(databaseName);
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ items });
     } catch (error) {
         return NextResponse.json(
-            { message: "Failed to fetch items", error },
+            { message: "Failed to fetch rebuttals", error },
             { status: 500 }
         );
     }
@@ -27,10 +27,10 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const result = await db.collection(collectionName).insertOne(body);
 
-        return NextResponse.json({ message: "Item created", result });
+        return NextResponse.json({ message: "rebuttal created", result });
     } catch (error) {
         return NextResponse.json(
-            { message: "Failed to create item", error },
+            { message: "Failed to create rebuttal", error },
             { status: 500 }
         );
     }
@@ -43,7 +43,7 @@ export async function DELETE(req: NextRequest) {
         const id = req.nextUrl.searchParams.get("id");
         if (!id || !ObjectId.isValid(id)) {
             return NextResponse.json(
-                { message: "Invalid Issue ID format" },
+                { message: "Invalid rebuttal ID format" },
                 { status: 400 }
             );
         }
@@ -67,7 +67,7 @@ export async function PATCH(req: NextRequest) {
         const id = req.nextUrl.searchParams.get("id");
         if (!id || !ObjectId.isValid(id)) {
             return NextResponse.json(
-                { message: "Invalid Issue ID format" },
+                { message: "Invalid rebuttal ID format" },
                 { status: 400 }
             );
         }
@@ -75,11 +75,10 @@ export async function PATCH(req: NextRequest) {
         const result = await db
             .collection(collectionName)
             .updateOne({ _id: new ObjectId(id) }, { $set: body });
-
-        return NextResponse.json({ message: "Item updated", result });
+        return NextResponse.json({ message: "Rebuttal updated", result });
     } catch (error) {
         return NextResponse.json(
-            { message: "Failed to update item", error },
+            { message: "Failed to update rebuttal", error },
             { status: 500 }
         );
     }

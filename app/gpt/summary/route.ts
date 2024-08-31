@@ -13,8 +13,6 @@ const responseFormat = JSON.stringify([
     { general_topic_2: [{ specific_todo_2_1: ["note_id_3"] }] },
 ]);
 
-const example = JSON.stringify({});
-
 export async function POST(req: Request) {
     const { paperTitle, paperAbstract, allNotes } = await req.json();
 
