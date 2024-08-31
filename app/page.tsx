@@ -260,7 +260,7 @@ export default function Page() {
 
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/outline`, {
             method: "PATCH",
-            body: JSON.stringify(outline),
+            body: outline,
         });
     }
 

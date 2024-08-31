@@ -105,7 +105,7 @@ function generateOutlineJSON(notesSummary) {
 
     return {
         type: "doc",
-        content: Object.entries(notesSummary).map(([heading, text]) =>
+        content: Object.entries(notesSummary[0]).map(([heading, text]) =>
             generateParagraph(heading, text)
         ),
     };
