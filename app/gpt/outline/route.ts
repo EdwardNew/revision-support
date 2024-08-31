@@ -3,30 +3,28 @@ import OpenAI from "openai";
 
 const openai = new OpenAI();
 
-const responseFormat = JSON.stringify([
-    {
-        Opening:
-            "We would like to thank the reviewers for their constructive comments and valuable feedback. We greatly appreciate the time and effort put into reviewing our paper.",
-        "Summary of Paper Contributions":
-            "Our paper, Boosting of Thoughts (BoT), introduces an automated prompting framework for problem solving with LLMs by iteratively exploring and self-evaluating many trees of thoughts. Our experiments demonstrate that BoT achieves higher or comparable problem-solving rates than other advanced prompting approaches.",
-        "Responses to Reviewers Concerns": {
-            "Incorporate Theoretical Insights": {
-                "Highlight how findings build on established ML theories":
-                    "We will address how our findings build on well-established ML theories and extend beyond practical applications of ML techniques. This will underscore the fundamental insights uncovered by our work.",
-            },
-            "Clarify Methodology": {
-                "Discuss aggregation strategies and tree edge weights in appendix":
-                    "We will include details on aggregation strategies and tree edge weights in the appendix, mentioning that these were previously left out for brevity.",
-                "Simplify abstract and methodology with clear descriptions":
-                    "We will revise the abstract and methodology sections to simplify explanations, using more straightforward language and clear, step-by-step descriptions of BoT's processes.",
-                "Justify the small dataset in evaluation":
-                    "We will address and justify the use of a small dataset for evaluation, explaining its relevance and limitations.",
-                "Clarify model aggregation and thought improvement processes":
-                    "We will clarify how the model aggregates and refines thoughts within the tree structure and how weaknesses in thoughts are identified and addressed.",
-            },
+const responseFormat = JSON.stringify({
+    Opening:
+        "We would like to thank the reviewers for their constructive comments and valuable feedback. We greatly appreciate the time and effort put into reviewing our paper.",
+    "Summary of Paper Contributions":
+        "Our paper, Boosting of Thoughts (BoT), introduces an automated prompting framework for problem solving with LLMs by iteratively exploring and self-evaluating many trees of thoughts. Our experiments demonstrate that BoT achieves higher or comparable problem-solving rates than other advanced prompting approaches.",
+    "Responses to Reviewers Concerns": {
+        "Incorporate Theoretical Insights": {
+            "Highlight how findings build on established ML theories":
+                "We will address how our findings build on well-established ML theories and extend beyond practical applications of ML techniques. This will underscore the fundamental insights uncovered by our work.",
+        },
+        "Clarify Methodology": {
+            "Discuss aggregation strategies and tree edge weights in appendix":
+                "We will include details on aggregation strategies and tree edge weights in the appendix, mentioning that these were previously left out for brevity.",
+            "Simplify abstract and methodology with clear descriptions":
+                "We will revise the abstract and methodology sections to simplify explanations, using more straightforward language and clear, step-by-step descriptions of BoT's processes.",
+            "Justify the small dataset in evaluation":
+                "We will address and justify the use of a small dataset for evaluation, explaining its relevance and limitations.",
+            "Clarify model aggregation and thought improvement processes":
+                "We will clarify how the model aggregates and refines thoughts within the tree structure and how weaknesses in thoughts are identified and addressed.",
         },
     },
-]);
+});
 
 export async function POST(req: Request) {
     const { paperTitle, paperAbstract, allNotes, todoList } = await req.json();

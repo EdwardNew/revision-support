@@ -8,10 +8,9 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { LoaderCircle, Save } from "lucide-react";
 
 // custom components imports
-import { Pdf } from "@/components/pdf/Pdf";
-import { Searchbar } from "@/components/Searchbar";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
 import { ReviewHighlightTooltip } from "@/components/ReviewHighlightTooltip";
 import { Review } from "@/components/Review";
@@ -81,24 +80,17 @@ export type TodoTopic = {
 //     timestamp: string;
 // };
 
-import type { IHighlight } from "react-pdf-highlighter";
-
-// TODO: delete
-import { todoList } from "@/app/testGeneratedTodoList";
-import { testOutline } from "@/components/TestOutline";
-
-export const BASE_URL = "https://revision-support.vercel.app";
+// export const BASE_URL = "https://revision-support.vercel.app";
+export const BASE_URL = "http://localhost:3000";
 
 const paperId: string = "66c8372c08c1a23625adf7ea";
 
 export default function Page() {
-    const [pdfHighlights, setPdfHighlights] = useState<Array<IHighlight>>([]);
-
     // get and store peer review data
+    const [openreviewPaperId, setOpenreviewPaperId] = useState<string>("");
     const [paperTitle, setPaperTitle] = useState<string>("");
     const [paperAbstract, setPaperAbstract] = useState<string>("");
-    const [paperPdfUrl, setPaperPdfUrl] = useState<string>("");
-    const [paperPdfBlob, setPaperPdfBlob] = useState<Blob | null>(null);
+    const [paperPdfUrl, setPaperPdfUrl] = useState<string | null>(null);
     const [reviews, setReviews] = useState<Array<Review>>([]);
     const [issuesId, setIssuesId] = useState<string>("");
     const [rebuttalId, setRebuttalId] = useState<string>("");
@@ -109,14 +101,25 @@ export default function Page() {
                 return res.json();
             })
             .then((data) => {
+                setOpenreviewPaperId(data.items.paper_id);
                 setPaperTitle(data.items.title);
                 setPaperAbstract(data.items.abstract);
-                setPaperPdfUrl(data.items.pdf);
                 setReviews(data.items.reviews);
                 setIssuesId(data.items.issues_id);
                 setRebuttalId(data.items.rebuttal_id);
             });
     }, []);
+
+    useEffect(() => {
+        if (!openreviewPaperId) {
+            return;
+        }
+        fetch(`${BASE_URL}/get_pdf?paper=${openreviewPaperId}`)
+            .then((res) => res.blob())
+            .then((blob) => {
+                setPaperPdfUrl(URL.createObjectURL(blob));
+            });
+    }, [openreviewPaperId]);
 
     // get and store issues; filter issues by selected tag filters
     const [selectedTags, setSelectedTags] = useState<Tags>({
@@ -143,6 +146,21 @@ export default function Page() {
     }, [issuesId]);
 
     useEffect(() => {
+        if (!rebuttalId) {
+            return;
+        }
+        fetch(`${BASE_URL}/rebuttals/${rebuttalId}`)
+            .then((res) => {
+                return res.json();
+            })
+            .then((data) => {
+                console.log("rebuttal data", data);
+                setTodoList(data.items.todos);
+                setOutline(data.items.outline);
+            });
+    }, [rebuttalId]);
+
+    useEffect(() => {
         const allSelectedTags = Object.values(selectedTags).flat();
         if (allSelectedTags.length === 0) {
             setFilteredIssues(allIssues);
@@ -162,6 +180,103 @@ export default function Page() {
         );
         setFilteredIssues(filteredIssues);
     }, [todoListIssueIds]);
+
+    const [todoList, setTodoList] = useState<Array<TodoTopic>>([]);
+    const [outline, setOutline] = useState();
+    const [loadingTodoList, setLoadingTodoList] = useState<boolean>(false);
+    const [loadingOutline, setLoadingOutline] = useState<boolean>(false);
+
+    async function generateTodoList() {
+        setLoadingTodoList(true);
+        const allNotes = allIssues.map((issue) => ({
+            id: issue._id,
+            note: issue.comment,
+            reviewContext: issue.highlight.text,
+        }));
+        const requestBody = {
+            paperTitle: paperTitle,
+            paperAbstract: paperAbstract,
+            // allReviews: reviews,
+            allNotes: allNotes,
+        };
+
+        console.log(requestBody);
+
+        const response = await fetch(`${BASE_URL}/gpt/summary`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        const summary = await response.json();
+
+        console.log(summary);
+
+        setTodoList(JSON.parse(summary));
+        setLoadingTodoList(false);
+
+        fetch(`${BASE_URL}/rebuttals/${rebuttalId}/todos`, {
+            method: "PATCH",
+            body: summary,
+        });
+    }
+
+    useEffect(() => {
+        console.log("todo list: ", todoList);
+    }, [todoList]);
+
+    async function generateOutline() {
+        setLoadingOutline(true);
+        const allNotes = allIssues.map((issue) => ({
+            id: issue._id,
+            note: issue.comment,
+            reviewContext: issue.highlight.text,
+        }));
+        const requestBody = {
+            paperTitle: paperTitle,
+            paperAbstract: paperAbstract,
+            allNotes: allNotes,
+            todoList: todoList,
+        };
+
+        console.log(requestBody);
+
+        const response = await fetch(`${BASE_URL}/gpt/outline`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        const outline = await response.json();
+
+        console.log("outline: ", outline);
+
+        setOutline(JSON.parse(outline));
+        setLoadingOutline(false);
+
+        fetch(`${BASE_URL}/rebuttals/${rebuttalId}/outline`, {
+            method: "PATCH",
+            body: JSON.stringify(outline),
+        });
+    }
+
+    async function saveTodoList() {
+        fetch(`${BASE_URL}/rebuttals/${rebuttalId}/todos`, {
+            method: "PATCH",
+            body: JSON.stringify(todoList),
+        });
+    }
+
+    async function saveOutline() {
+        fetch(`${BASE_URL}/rebuttals/${rebuttalId}/outline`, {
+            method: "PATCH",
+            body: outline,
+        });
+    }
 
     // handle review highlights
     const [reviewsPanelSize, setReviewsPanelSize] = useState<number>(50);
@@ -276,70 +391,6 @@ export default function Page() {
     const [showRebuttal, setShowRebuttal] = useState<boolean>(false);
     const panelActiveClass = "bg-slate-200";
 
-    const [notesSummary, setNotesSummary] =
-        useState<Array<TodoTopic>>(todoList);
-    const [rebuttalOutline, setRebuttalOutline] = useState(testOutline);
-
-    async function generateNotesSummary() {
-        const allNotes = allIssues.map((issue) => ({
-            id: issue._id,
-            note: issue.comment,
-            reviewContext: issue.highlight.text,
-        }));
-        const requestBody = {
-            paperTitle: paperTitle,
-            paperAbstract: paperAbstract,
-            // allReviews: reviews,
-            allNotes: allNotes,
-        };
-
-        console.log(requestBody);
-
-        const response = await fetch(`${BASE_URL}/gpt/summary`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestBody),
-        });
-
-        const summary = await response.json();
-
-        console.log(summary);
-
-        setNotesSummary(JSON.parse(summary));
-    }
-
-    async function generateOutline() {
-        const allNotes = allIssues.map((issue) => ({
-            id: issue._id,
-            note: issue.comment,
-            reviewContext: issue.highlight.text,
-        }));
-        const requestBody = {
-            paperTitle: paperTitle,
-            paperAbstract: paperAbstract,
-            allNotes: allNotes,
-            todoList: todoList,
-        };
-
-        console.log(requestBody);
-
-        const response = await fetch(`${BASE_URL}/gpt/outline`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestBody),
-        });
-
-        const outline = await response.json();
-
-        console.log(outline);
-
-        setRebuttalOutline(JSON.parse(outline));
-    }
-
     return (
         <div className="flex flex-col h-screen items-center">
             <div className="flex justify-between p-2 w-1/2 min-w-[450px]">
@@ -408,11 +459,15 @@ export default function Page() {
                                 <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                     PDF Viewer
                                 </div>
-                                <div className="h-full">
-                                    {/* <Pdf
-                                        highlights={pdfHighlights}
-                                        setHighlights={setPdfHighlights}
-                                    /> */}
+                                <div className="h-full flex items-center justify-center">
+                                    {paperPdfUrl ? (
+                                        <iframe
+                                            src={paperPdfUrl}
+                                            className="w-full h-full"
+                                        />
+                                    ) : (
+                                        <LoaderCircle className="animate-spin h-10 w-10 text-gray-400" />
+                                    )}
                                 </div>
                             </div>
                         </ResizablePanel>
@@ -426,7 +481,7 @@ export default function Page() {
                             order={2}
                             defaultSize={40}
                             minSize={20}
-                            onResize={(size) => {
+                            onResize={(size: number) => {
                                 setReviewsPanelSize(size);
                             }}
                         >
@@ -547,10 +602,13 @@ export default function Page() {
                                     <Button
                                         onClick={() => {
                                             setShowRebuttal(true);
-                                            generateNotesSummary();
+                                            generateTodoList();
                                         }}
                                     >
                                         Summarize Notes
+                                        {loadingTodoList && (
+                                            <LoaderCircle className="animate-spin ml-4 w-4 h-4" />
+                                        )}
                                     </Button>
                                 </div>
                             </div>
@@ -647,26 +705,40 @@ export default function Page() {
                                     className="h-full"
                                 >
                                     <div className="h-full flex flex-col">
-                                        <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                            Todo List
+                                        <div className="flex justify-between items-center mr-5">
+                                            <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                                Todo List
+                                            </div>
+                                            {/* <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => {
+                                                    saveTodoList;
+                                                }}
+                                                className="border-none shadow-none"
+                                            >
+                                                <Save className="w-4 h-4 hover:bg-slate-200" />
+                                            </Button> */}
                                         </div>
                                         <div className="flex-1 px-4 overflow-y-auto">
                                             <Tiptap
                                                 type="todoList"
-                                                rawContent={notesSummary}
+                                                rawContent={todoList}
                                                 setFilteredIssues={
                                                     setTodoListIssueIds
                                                 }
                                             />
-                                            <div className="flex justify-center mt-4">
-                                                <Button
-                                                    onClick={() =>
-                                                        generateOutline()
-                                                    }
-                                                >
-                                                    Generate Outline
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                onClick={() =>
+                                                    generateOutline()
+                                                }
+                                                className="my-4 w-full"
+                                            >
+                                                Generate Outline
+                                                {loadingOutline && (
+                                                    <LoaderCircle className="animate-spin ml-4 w-4 h-4" />
+                                                )}
+                                            </Button>
                                         </div>
                                     </div>
                                 </ResizablePanel>
@@ -677,17 +749,27 @@ export default function Page() {
                                     className="h-full"
                                 >
                                     <div className="h-full flex flex-col">
-                                        <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                            Rebuttal Outline
+                                        <div className="flex justify-between items-center mr-5">
+                                            <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
+                                                Rebuttal Outline
+                                            </div>
+                                            {/* <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => {
+                                                    saveOutline;
+                                                }}
+                                                className="border-none shadow-none"
+                                            >
+                                                <Save className="w-4 h-4 hover:bg-slate-200" />
+                                            </Button> */}
                                         </div>
+
                                         <div className="flex-1 p-4 overflow-y-auto">
                                             <Tiptap
                                                 type="outline"
-                                                rawContent={rebuttalOutline}
+                                                rawContent={outline}
                                             />
-                                            <div className="flex justify-center mt-4">
-                                                <Button>Save Outline</Button>
-                                            </div>
                                         </div>
                                     </div>
                                 </ResizablePanel>

@@ -105,13 +105,14 @@ function generateOutlineJSON(notesSummary) {
 
     return {
         type: "doc",
-        content: Object.entries(notesSummary[0]).map(([heading, text]) =>
+        content: Object.entries(notesSummary).map(([heading, text]) =>
             generateParagraph(heading, text)
         ),
     };
 }
 
 import type { TodoTopic } from "@/app/page";
+import { useEffect } from "react";
 
 type TiptapProps = {
     rawContent: TodoTopic[] | any;
@@ -161,10 +162,21 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
         content: parsedContent,
         editorProps: {
             attributes: {
-                class: "min-h-[250px] p-4 focus:outline-none",
+                class: "min-h-[250px] p-4 focus:outline-none text-sm",
             },
         },
     });
+
+    useEffect(() => {
+        if (editor) {
+            const newContent =
+                type === "todoList"
+                    ? generateTodoListJSON(rawContent)
+                    : generateOutlineJSON(rawContent);
+            editor.commands.setContent(newContent);
+        }
+    }, [rawContent, editor]);
+
     if (!editor) {
         return null;
     }
