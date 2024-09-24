@@ -402,6 +402,8 @@ export default function PanelManager() {
         enableNotesSummary = true;
     }
 
+    console.log("base url:", BASE_URL);
+
     return (
         <div className="flex flex-col h-screen items-center">
             <div className="flex justify-between p-2 w-1/2 min-w-[450px]">
