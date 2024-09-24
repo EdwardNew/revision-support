@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/card";
 import { validateRequest } from "@/lib/lucia";
 import { redirect } from "next/navigation";
+import { BASE_URL } from "@/components/PanelManager";
 
 export default async function page() {
     const { user } = await validateRequest();
     if (user) {
         return redirect("/dashboard");
     }
+    console.log("base url:", BASE_URL);
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <Card className="w-full max-w-md">
