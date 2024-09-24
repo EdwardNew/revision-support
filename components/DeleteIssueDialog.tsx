@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-import { BASE_URL } from "@/app/page";
-import type { Issue } from "@/app/page";
+import { BASE_URL } from "@/components/PanelManager";
+import type { Issue } from "@/components/PanelManager";
 import { useRef } from "react";
 
 type DeleteIssueDialogProps = {

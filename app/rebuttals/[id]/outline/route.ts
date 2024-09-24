@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongobd";
+import { rebuttalsCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-
-const databaseName = "revision_support";
-const collectionName = "rebuttals";
 
 export async function GET(
     req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const rebuttal_id = params.id;
         if (!ObjectId.isValid(rebuttal_id)) {
             return NextResponse.json(
@@ -19,12 +14,10 @@ export async function GET(
                 { status: 400 }
             );
         }
-        const items = await db
-            .collection(collectionName)
-            .findOne(
-                { _id: new ObjectId(rebuttal_id) },
-                { projection: { outline: 1 } }
-            );
+        const items = await rebuttalsCollection.findOne(
+            { _id: new ObjectId(rebuttal_id) },
+            { projection: { outline: 1 } }
+        );
         return NextResponse.json({ items });
     } catch (error) {
         return NextResponse.json(
@@ -39,8 +32,6 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const rebuttal_id = params.id;
         if (!ObjectId.isValid(rebuttal_id)) {
             return NextResponse.json(
@@ -49,7 +40,7 @@ export async function PATCH(
             );
         }
         const body = await req.json();
-        const result = await db.collection(collectionName).updateOne(
+        const result = await rebuttalsCollection.updateOne(
             {
                 _id: new ObjectId(rebuttal_id),
             },

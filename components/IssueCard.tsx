@@ -25,8 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 
-import { BASE_URL } from "@/app/page";
-import type { Issue } from "@/app/page";
+import { BASE_URL } from "@/components/PanelManager";
+import type { Issue } from "@/components/PanelManager";
 import { gptResponseMap } from "./NewNoteForm";
 
 import { DeleteIssueDialog } from "@/components/DeleteIssueDialog";

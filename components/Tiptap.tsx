@@ -111,7 +111,7 @@ function generateOutlineJSON(notesSummary) {
     };
 }
 
-import type { TodoTopic } from "@/app/page";
+import type { TodoTopic } from "@/";
 import { useEffect } from "react";
 
 type TiptapProps = {

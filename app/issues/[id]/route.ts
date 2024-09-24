@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongobd";
+import { issuesCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-
-const databaseName = "revision_support";
-const collectionName = "issues";
 
 export async function GET(
     req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const issue_id = params.id;
         if (!ObjectId.isValid(issue_id)) {
             return NextResponse.json(
@@ -19,9 +14,9 @@ export async function GET(
                 { status: 400 }
             );
         }
-        const items = await db
-            .collection(collectionName)
-            .findOne({ _id: new ObjectId(issue_id) });
+        const items = await issuesCollection.findOne({
+            _id: new ObjectId(issue_id),
+        });
         return NextResponse.json({ items });
     } catch (error) {
         return NextResponse.json(
@@ -36,8 +31,6 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const issue_id = params.id;
         if (!ObjectId.isValid(issue_id)) {
             return NextResponse.json(
@@ -47,12 +40,10 @@ export async function POST(
         }
         const body = await req.json();
         const newNote = { _id: new ObjectId(), ...body };
-        const result = await db
-            .collection(collectionName)
-            .updateOne(
-                { _id: new ObjectId(issue_id) },
-                { $push: { notes: newNote } }
-            );
+        const result = await issuesCollection.updateOne(
+            { _id: new ObjectId(issue_id) },
+            { $push: { notes: newNote } }
+        );
 
         if (result.modifiedCount === 0) {
             return NextResponse.json(
@@ -79,8 +70,6 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const issue_id = params.id;
         if (!ObjectId.isValid(issue_id)) {
             return NextResponse.json(
@@ -96,12 +85,10 @@ export async function DELETE(
                 { status: 400 }
             );
         }
-        const result = await db
-            .collection(collectionName)
-            .updateOne(
-                { _id: new ObjectId(issue_id) },
-                { $pull: { notes: { _id: new ObjectId(note_id) } } as any }
-            );
+        const result = await issuesCollection.updateOne(
+            { _id: new ObjectId(issue_id) },
+            { $pull: { notes: { _id: new ObjectId(note_id) } } as any }
+        );
 
         return NextResponse.json({ message: "Item deleted", result });
     } catch (error) {
@@ -117,8 +104,6 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const issue_id = params.id;
         if (!ObjectId.isValid(issue_id)) {
             return NextResponse.json(
@@ -134,7 +119,7 @@ export async function PATCH(
             );
         }
         const body = await req.json();
-        const result = await db.collection(collectionName).updateOne(
+        const result = await issuesCollection.updateOne(
             {
                 _id: new ObjectId(issue_id),
                 "notes._id": new ObjectId(note_id),

@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongobd";
+import { papersCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-
-const databaseName = "revision_support";
-const collectionName = "papers";
 
 export async function GET(
     req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const paper_id = params.id;
         if (!ObjectId.isValid(paper_id)) {
             return NextResponse.json(
@@ -19,9 +14,9 @@ export async function GET(
                 { status: 400 }
             );
         }
-        const items = await db
-            .collection(collectionName)
-            .findOne({ _id: new ObjectId(paper_id) });
+        const items = await papersCollection.findOne({
+            _id: new ObjectId(paper_id),
+        });
         return NextResponse.json({ items });
     } catch (error) {
         return NextResponse.json(

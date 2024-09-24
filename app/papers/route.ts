@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongobd";
-
-const databaseName = "revision_support";
-const collectionName = "papers";
+import { papersCollection } from "@/lib/mongodb";
 
 export async function GET(req: NextRequest) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
-        const items = await db.collection(collectionName).find().toArray();
+        const items = await papersCollection.find().toArray();
 
         return NextResponse.json({ items });
     } catch (error) {
@@ -21,10 +16,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const client = await clientPromise;
-        const db = client.db(databaseName);
         const body = await req.json();
-        const result = await db.collection(collectionName).insertOne(body);
+        const result = await papersCollection.insertOne(body);
 
         return NextResponse.json({ message: "Item created", result });
     } catch (error) {

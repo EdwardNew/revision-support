@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-import type { discussionComment } from "@/app/page";
+import type { discussionComment } from "@/components/PanelManager";
 
 type DiscussionCardProps = {
     comment: discussionComment;

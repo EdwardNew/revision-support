@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useState } from "react";
-import type { DiscussionComment } from "@/app/page";
+import type { DiscussionComment } from "@/components/PanelManager";
 
 type DiscussionTextareaProps = {
     setCurrentComments: React.Dispatch<

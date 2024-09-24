@@ -3,11 +3,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { CheckCircledIcon } from "@radix-ui/react-icons";
 import { LoaderCircle, Sparkles } from "lucide-react";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { computeXPath } from "compute-xpath";
 
-import { BASE_URL } from "@/app/page";
-import type { Issue } from "@/app/page";
+import { BASE_URL } from "@/components/PanelManager";
+import type { Issue } from "@/components/PanelManager";
 
 type EmptyIssue = {
     comment: string;
@@ -81,7 +81,8 @@ export const gptResponseMap: GptResponseMap = {
     },
 };
 
-import type { Review } from "@/app/page";
+import type { Review } from "@/components/PanelManager";
+import { UserContext } from "./context/UserContextProvider";
 
 type NewNoteFormProps = {
     showForm: boolean;
@@ -254,6 +255,12 @@ export function NewNoteForm({
         setGptResponse(null);
     }, [showForm]);
 
+    const { treatment } = useContext(UserContext);
+    let enableInsitu = true;
+    if (treatment === "No-AI") {
+        enableInsitu = false;
+    }
+
     return (
         <>
             {showForm && formPosition && (
@@ -311,47 +318,49 @@ export function NewNoteForm({
                             </div>
                         </div>
                     )}
-                    <div className="flex gap-4 pb-2">
-                        <Button
-                            variant="outline"
-                            className="h-6 text-xs rounded-full text-violet-600 hover:bg-violet-600 hover:text-white"
-                            type="button"
-                            onClick={() => fetchChatResponse("strategize")}
-                        >
-                            Strategize
-                            {loadingResponseType === "strategize" ? (
-                                <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
-                            ) : (
-                                <Sparkles className="ml-1 w-3 h-3" />
-                            )}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="h-6 text-xs rounded-full text-green-600 hover:bg-green-600 hover:text-white"
-                            type="button"
-                            onClick={() => fetchChatResponse("reflect")}
-                        >
-                            Reflect
-                            {loadingResponseType === "reflect" ? (
-                                <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
-                            ) : (
-                                <Sparkles className="ml-1 w-3 h-3" />
-                            )}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="h-6 text-xs rounded-full text-pink-500 hover:bg-pink-500 hover:text-white"
-                            type="button"
-                            onClick={() => fetchChatResponse("explain")}
-                        >
-                            Explain
-                            {loadingResponseType === "explain" ? (
-                                <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
-                            ) : (
-                                <Sparkles className="ml-1 w-3 h-3" />
-                            )}
-                        </Button>
-                    </div>
+                    {enableInsitu && (
+                        <div className="flex gap-4 pb-2">
+                            <Button
+                                variant="outline"
+                                className="h-6 text-xs rounded-full text-violet-600 hover:bg-violet-600 hover:text-white"
+                                type="button"
+                                onClick={() => fetchChatResponse("strategize")}
+                            >
+                                Strategize
+                                {loadingResponseType === "strategize" ? (
+                                    <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                                ) : (
+                                    <Sparkles className="ml-1 w-3 h-3" />
+                                )}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-6 text-xs rounded-full text-green-600 hover:bg-green-600 hover:text-white"
+                                type="button"
+                                onClick={() => fetchChatResponse("reflect")}
+                            >
+                                Reflect
+                                {loadingResponseType === "reflect" ? (
+                                    <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                                ) : (
+                                    <Sparkles className="ml-1 w-3 h-3" />
+                                )}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-6 text-xs rounded-full text-pink-500 hover:bg-pink-500 hover:text-white"
+                                type="button"
+                                onClick={() => fetchChatResponse("explain")}
+                            >
+                                Explain
+                                {loadingResponseType === "explain" ? (
+                                    <LoaderCircle className="animate-spin ml-1 w-3 h-3" />
+                                ) : (
+                                    <Sparkles className="ml-1 w-3 h-3" />
+                                )}
+                            </Button>
+                        </div>
+                    )}
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();

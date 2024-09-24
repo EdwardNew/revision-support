@@ -1,4 +1,4 @@
-import type { Issue } from "@/app/page";
+import type { Issue } from "@/components/PanelManager";
 import { ReactNode } from "react";
 
 type DiscussionSectionProps = {

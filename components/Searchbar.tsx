@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { MagnifyingGlassIcon, Cross2Icon } from "@radix-ui/react-icons";
 
-import type { Tags } from "@/app/page";
+import type { Tags } from "@/components/PanelManager";
 
 const tagCategoryColors = {
     reviewer: "text-red-600" as string,

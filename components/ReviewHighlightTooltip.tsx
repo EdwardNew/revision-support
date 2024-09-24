@@ -5,9 +5,9 @@ import { useState, useEffect } from "react";
 import { ReviewHighlight } from "./ReviewHighlight";
 import { NewNoteForm } from "./NewNoteForm";
 
-import { Issue } from "@/app/page";
+import { Issue } from "@/components/PanelManager";
 
-import type { Review } from "@/app/page";
+import type { Review } from "@/components/PanelManager";
 
 type ReviewHighlightTooltipProps = {
     reviewPanelSize: number;
