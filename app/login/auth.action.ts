@@ -1,12 +1,12 @@
 "use server";
 import { usersCollection } from "@/lib/mongodb";
-import { SignUpSchema } from "@/components/SignUpForm";
+import { SignUpSchema } from "@/components/login/SignUpForm";
 import { z } from "zod";
 import { Argon2id } from "oslo/password";
 import { lucia, validateRequest } from "@/lib/lucia";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { SignInSchema } from "@/components/SignInForm";
+import { SignInSchema } from "@/components/login/SignInForm";
 import { ObjectId } from "mongodb";
 
 export async function signUp(values: z.infer<typeof SignUpSchema>) {

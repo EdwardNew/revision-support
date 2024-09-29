@@ -1,6 +1,6 @@
-import LoginTabs from "@/components/LoginTabs";
-import SignInForm from "@/components/SignInForm";
-import SignUpForm from "@/components/SignUpForm";
+import LoginTabs from "@/components/login/LoginTabs";
+import SignInForm from "@/components/login/SignInForm";
+import SignUpForm from "@/components/login/SignUpForm";
 import {
     Card,
     CardHeader,

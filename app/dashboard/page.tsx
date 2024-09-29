@@ -10,7 +10,11 @@ export default async function page() {
         return redirect("/login");
     }
     return (
-        <UserContextProvider treatment={user.treatment}>
+        <UserContextProvider
+            username={user.username}
+            treatment={user.treatment}
+            papers={user.papers}
+        >
             {/* <Test db_paper_id={user.papers[0]}></Test> */}
             <PanelManager />
         </UserContextProvider>

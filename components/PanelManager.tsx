@@ -15,9 +15,9 @@ import { Review } from "@/components/Review";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
 import { ReviewHighlightTooltip } from "@/components/ReviewHighlightTooltip";
 import { Tiptap } from "@/components/Tiptap";
-// import { DiscussionSection } from "@/components/DiscussionSection";
-// import { DiscussionCard } from "@/components/DisucssionCard";
-// import { DiscussionTextarea } from "@/components/DiscussionTextarea";
+// import { DiscussionSection } from "@/components/discussion/DiscussionSection";
+// import { DiscussionCard } from "@/components/discussion/DisucssionCard";
+// import { DiscussionTextarea } from "@/components/discussion/DiscussionTextarea";
 
 import { useContext, useEffect, useRef, useState } from "react";
 
@@ -82,13 +82,14 @@ export type TodoTopic = {
 //     timestamp: string;
 // };
 
-export const BASE_URL = "https://" + process.env.VERCEL_URL;
+// export const BASE_URL = "https://" + process.env.NEXT_PUBLIC_VERCEL_URL;
 // export const BASE_URL = "https://revision-support.vercel.app";
-// export const BASE_URL = "http://localhost:3000";
-
-const paperId: string = "66c8372c08c1a23625adf7ea";
+export const BASE_URL = "http://localhost:3000";
 
 export default function PanelManager() {
+    const { papers } = useContext(UserContext);
+    const paperId: string = papers[0].toString();
+
     // get and store peer review data
     const [openreviewPaperId, setOpenreviewPaperId] = useState<string>("");
     const [paperTitle, setPaperTitle] = useState<string>("");
@@ -394,7 +395,7 @@ export default function PanelManager() {
     const [showRebuttal, setShowRebuttal] = useState<boolean>(false);
     const panelActiveClass = "bg-slate-200";
 
-    const { treatment } = useContext(UserContext);
+    const { username, treatment } = useContext(UserContext);
 
     let enableNotesSummary = false;
 
@@ -464,6 +465,8 @@ export default function PanelManager() {
                 >
                     log out
                 </Button>
+                <div className="mr-4">{username}</div>
+                <div>{issuesId}</div>
             </div>
             <ResizablePanelGroup
                 direction="horizontal"
@@ -597,6 +600,13 @@ export default function PanelManager() {
                                     </Button>
                                 </div>
 
+                                {filteredIssues.length === 0 && (
+                                    <div className="text-sm mx-auto my-auto">
+                                        highlight a snippet in the reviews panel
+                                        to add a note
+                                    </div>
+                                )}
+
                                 <div className="grid gap-4 p-6 overflow-y-auto">
                                     {filteredIssues &&
                                         filteredIssues.map((issue) => (
@@ -717,7 +727,7 @@ export default function PanelManager() {
                                     <div className="h-full flex flex-col">
                                         <div className="flex justify-between items-center mr-5">
                                             <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
-                                                Todo List
+                                                To Do List for Paper Revisions
                                             </div>
                                             {/* <Button
                                                 variant="outline"
