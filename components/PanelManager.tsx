@@ -83,8 +83,8 @@ export type TodoTopic = {
 // };
 
 // export const BASE_URL = "https://" + process.env.NEXT_PUBLIC_VERCEL_URL;
-// export const BASE_URL = "https://revision-support.vercel.app";
-export const BASE_URL = "http://localhost:3000";
+export const BASE_URL = "https://revision-support.vercel.app";
+// export const BASE_URL = "http://localhost:3000";
 
 export default function PanelManager() {
     const { papers } = useContext(UserContext);
