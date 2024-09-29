@@ -403,7 +403,7 @@ export default function PanelManager() {
         enableNotesSummary = true;
     }
 
-    console.log("base url:", process.env.VERCEL_URL);
+    console.log("base url:", process.env.NEXT_PUBLIC_VERCEL_URL);
 
     return (
         <div className="flex flex-col h-screen items-center">
