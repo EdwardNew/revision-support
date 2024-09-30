@@ -187,16 +187,16 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
 
     return (
         <div className="border rounded-lg overflow-hidden">
-            <div className="bg-muted p-2 flex gap-1">
+            <div className="bg-muted p-1 flex gap-1">
                 <Toggle
-                    className="data-[state=on]:bg-slate-300 hover:bg-slate-200"
+                    className=" data-[state=on]:bg-slate-300 hover:bg-slate-200"
                     aria-label="Toggle bold"
                     pressed={editor.isActive("bold")}
                     onPressedChange={() =>
                         editor.chain().focus().toggleBold().run()
                     }
                 >
-                    <Bold className="h-4 w-4" />
+                    <Bold className="h-3 w-3" />
                 </Toggle>
                 <Toggle
                     className="data-[state=on]:bg-slate-300 hover:bg-slate-200"
@@ -206,7 +206,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
                         editor.chain().focus().toggleItalic().run()
                     }
                 >
-                    <Italic className="h-4 w-4" />
+                    <Italic className="h-3 w-3" />
                 </Toggle>
                 <Toggle
                     className="data-[state=on]:bg-slate-300 hover:bg-slate-200"
@@ -216,7 +216,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
                         editor.chain().focus().toggleUnderline().run()
                     }
                 >
-                    <UnderlineIcon className="h-4 w-4" />
+                    <UnderlineIcon className="h-3 w-3" />
                 </Toggle>
                 <Toggle
                     className="data-[state=on]:bg-slate-300 hover:bg-slate-200"
@@ -226,7 +226,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
                         editor.chain().focus().toggleBulletList().run()
                     }
                 >
-                    <List className="h-4 w-4" />
+                    <List className="h-3 w-3" />
                 </Toggle>
                 <Toggle
                     className="data-[state=on]:bg-slate-300 hover:bg-slate-200"
@@ -236,7 +236,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
                         editor.chain().focus().toggleOrderedList().run()
                     }
                 >
-                    <ListOrdered className="h-4 w-4" />
+                    <ListOrdered className="h-3 w-3" />
                 </Toggle>
                 <Toggle
                     className="data-[state=on]:bg-slate-300 hover:bg-slate-200"
@@ -246,7 +246,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
                         editor.chain().focus().toggleTaskList().run()
                     }
                 >
-                    <ListChecks className="h-4 w-4" />
+                    <ListChecks className="h-3 w-3" />
                 </Toggle>
             </div>
             <EditorContent editor={editor} />

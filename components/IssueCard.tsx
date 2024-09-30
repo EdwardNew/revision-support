@@ -150,12 +150,12 @@ export function IssueCard({ issue, issuesId, setAllIssues }: IssueCardProps) {
                                     <Pencil2Icon className="w-4 h-4 mr-2" />
                                     Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
+                                {/* <DropdownMenuItem
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     <CheckIcon className="w-4 h-4 mr-2" />
                                     Resolve
-                                </DropdownMenuItem>
+                                </DropdownMenuItem> */}
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                     onClick={(e) => {

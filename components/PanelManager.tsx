@@ -7,9 +7,10 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Save } from "lucide-react";
 
 // custom components imports
+import { UserProfile } from "@/components/UserProfile";
 import { IssueCard } from "@/components/IssueCard";
 import { Review } from "@/components/Review";
 import { ReviewHighlight } from "@/components/ReviewHighlight";
@@ -22,7 +23,6 @@ import { Tiptap } from "@/components/Tiptap";
 import { useContext, useEffect, useRef, useState } from "react";
 
 import { GptResponseMap } from "@/components/NewNoteForm";
-import { logout } from "@/app/login/auth.action";
 import { UserContext } from "./context/UserContextProvider";
 import PDFPanel from "./PDFPanel";
 
@@ -83,8 +83,8 @@ export type TodoTopic = {
 // };
 
 // export const BASE_URL = "https://" + process.env.NEXT_PUBLIC_VERCEL_URL;
-export const BASE_URL = "https://revision-support.vercel.app";
-// export const BASE_URL = "http://localhost:3000";
+// export const BASE_URL = "https://revision-support.vercel.app";
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function PanelManager() {
     const { papers } = useContext(UserContext);
@@ -269,6 +269,7 @@ export default function PanelManager() {
     }
 
     async function saveTodoList() {
+        console.log(todoList);
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/todos`, {
             method: "PATCH",
             body: JSON.stringify(todoList),
@@ -456,17 +457,7 @@ export default function PanelManager() {
                 >
                     Rebuttal
                 </Button>
-                <Button
-                    variant="outline"
-                    className="rounded-full border-slate-600"
-                    onClick={async () => {
-                        await logout();
-                    }}
-                >
-                    log out
-                </Button>
-                <div className="mr-4">{username}</div>
-                <div>{issuesId}</div>
+                <UserProfile username={username} />
             </div>
             <ResizablePanelGroup
                 direction="horizontal"
@@ -729,7 +720,7 @@ export default function PanelManager() {
                                             <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                                 To Do List for Paper Revisions
                                             </div>
-                                            {/* <Button
+                                            <Button
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => {
@@ -738,7 +729,7 @@ export default function PanelManager() {
                                                 className="border-none shadow-none"
                                             >
                                                 <Save className="w-4 h-4 hover:bg-slate-200" />
-                                            </Button> */}
+                                            </Button>
                                         </div>
                                         <div className="flex-1 px-4 overflow-y-auto">
                                             <Tiptap
@@ -775,7 +766,7 @@ export default function PanelManager() {
                                             <div className=" text-secondary-foreground px-4 py-3 font-medium rounded-t-lg">
                                                 Rebuttal Outline
                                             </div>
-                                            {/* <Button
+                                            <Button
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => {
@@ -784,10 +775,10 @@ export default function PanelManager() {
                                                 className="border-none shadow-none"
                                             >
                                                 <Save className="w-4 h-4 hover:bg-slate-200" />
-                                            </Button> */}
+                                            </Button>
                                         </div>
 
-                                        <div className="flex-1 p-4 overflow-y-auto">
+                                        <div className="flex-1 px-4 overflow-y-auto">
                                             <Tiptap
                                                 type="outline"
                                                 rawContent={outline}
