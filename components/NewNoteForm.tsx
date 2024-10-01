@@ -256,9 +256,9 @@ export function NewNoteForm({
     }, [showForm]);
 
     const { treatment } = useContext(UserContext);
-    let enableInsitu = true;
-    if (treatment === "No-AI") {
-        enableInsitu = false;
+    let enableInsitu = false;
+    if (treatment === "Full-AI") {
+        enableInsitu = true;
     }
 
     return (

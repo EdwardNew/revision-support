@@ -403,10 +403,10 @@ export default function PanelManager() {
 
     const { username, treatment } = useContext(UserContext);
 
-    let enableNotesSummary = false;
+    let enableNotesSummary = true;
 
-    if (treatment === "Full-AI") {
-        enableNotesSummary = true;
+    if (treatment === "No-AI") {
+        enableNotesSummary = false;
     }
 
     return (
