@@ -83,8 +83,8 @@ export type TodoTopic = {
 // };
 
 // export const BASE_URL = "https://" + process.env.NEXT_PUBLIC_VERCEL_URL;
-// export const BASE_URL = "https://revision-support.vercel.app";
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+export const BASE_URL = "https://revision-support.vercel.app";
+// export const BASE_URL = "http://localhost:3000/";
 
 export default function PanelManager() {
     const { papers } = useContext(UserContext);
@@ -185,7 +185,7 @@ export default function PanelManager() {
         setFilteredIssues(filteredIssues);
     }, [todoListIssueIds]);
 
-    const [todoList, setTodoList] = useState<Array<TodoTopic>>([]);
+    const [todoList, setTodoList] = useState();
     const [outline, setOutline] = useState();
     const [loadingTodoList, setLoadingTodoList] = useState<boolean>(false);
     const [loadingOutline, setLoadingOutline] = useState<boolean>(false);
@@ -231,6 +231,10 @@ export default function PanelManager() {
         console.log("todo list: ", todoList);
     }, [todoList]);
 
+    useEffect(() => {
+        console.log("outline: ", outline);
+    }, [outline]);
+
     async function generateOutline() {
         setLoadingOutline(true);
         const allNotes = allIssues.map((issue) => ({
@@ -264,12 +268,12 @@ export default function PanelManager() {
 
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/outline`, {
             method: "PATCH",
-            body: outline,
+            body: JSON.stringify(outline),
         });
     }
 
     async function saveTodoList() {
-        console.log(todoList);
+        console.log("saving todo list!", todoList);
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/todos`, {
             method: "PATCH",
             body: JSON.stringify(todoList),
@@ -277,9 +281,10 @@ export default function PanelManager() {
     }
 
     async function saveOutline() {
+        console.log(outline);
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/outline`, {
             method: "PATCH",
-            body: outline,
+            body: JSON.stringify(outline),
         });
     }
 
@@ -403,8 +408,6 @@ export default function PanelManager() {
     if (treatment === "Full-AI") {
         enableNotesSummary = true;
     }
-
-    console.log("base url:", process.env.NEXT_PUBLIC_VERCEL_URL);
 
     return (
         <div className="flex flex-col h-screen items-center">
@@ -724,7 +727,8 @@ export default function PanelManager() {
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => {
-                                                    saveTodoList;
+                                                    console.log("saving!");
+                                                    saveTodoList();
                                                 }}
                                                 className="border-none shadow-none"
                                             >
@@ -735,6 +739,7 @@ export default function PanelManager() {
                                             <Tiptap
                                                 type="todoList"
                                                 rawContent={todoList}
+                                                setRawContent={setTodoList}
                                                 setFilteredIssues={
                                                     setTodoListIssueIds
                                                 }
@@ -770,7 +775,10 @@ export default function PanelManager() {
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => {
-                                                    saveOutline;
+                                                    console.log(
+                                                        "saving outline!"
+                                                    );
+                                                    saveOutline();
                                                 }}
                                                 className="border-none shadow-none"
                                             >
@@ -782,6 +790,7 @@ export default function PanelManager() {
                                             <Tiptap
                                                 type="outline"
                                                 rawContent={outline}
+                                                setRawContent={setOutline}
                                             />
                                         </div>
                                     </div>

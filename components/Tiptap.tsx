@@ -4,123 +4,26 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
+import { CustomHeading } from "@/components/HeadingExtension";
 import { TestCustomParagraph } from "./TestParagraphExtension";
 
 import { Bold, Italic, List, ListChecks, ListOrdered } from "lucide-react";
 import { UnderlineIcon } from "@radix-ui/react-icons";
-
-function generateTodoListJSON(notesSummary) {
-    if (!notesSummary) {
-        return;
-    }
-
-    return {
-        type: "doc",
-        content: [
-            {
-                type: "bulletList",
-                content: notesSummary.map((topicObject) => {
-                    const topic = Object.keys(topicObject)[0];
-                    const actionItems = topicObject[topic];
-                    return {
-                        type: "listItem",
-                        content: [
-                            {
-                                type: "paragraph",
-                                content: [{ type: "text", text: topic }],
-                            },
-                            {
-                                type: "bulletList",
-                                content: actionItems.map((actionItemObject) => {
-                                    const actionItem =
-                                        Object.keys(actionItemObject)[0];
-                                    const ids =
-                                        actionItemObject[actionItem].join(",");
-                                    return {
-                                        type: "listItem",
-                                        content: [
-                                            {
-                                                type: "customParagraph",
-                                                attrs: {
-                                                    "data-ids": ids,
-                                                },
-                                                content: [
-                                                    {
-                                                        type: "text",
-                                                        text: actionItem,
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    };
-                                }),
-                            },
-                        ],
-                    };
-                }),
-            },
-        ],
-    };
-}
-
-function generateOutlineJSON(notesSummary) {
-    if (!notesSummary) {
-        return;
-    }
-
-    function generateParagraph(heading, text) {
-        if (text && typeof text === "object") {
-            // If the text is an object, recursively process it
-            return {
-                type: "paragraph",
-                content: [
-                    {
-                        type: "text",
-                        text: heading,
-                        marks: [{ type: "bold" }, { type: "underline" }],
-                    },
-                    ...Object.entries(text).map(([subHeading, subText]) =>
-                        generateParagraph(subHeading, subText)
-                    ),
-                ],
-            };
-        } else {
-            // Base case: when text is not an object
-            return {
-                type: "paragraph",
-                content: [
-                    {
-                        type: "text",
-                        marks: [{ type: "bold" }, { type: "underline" }],
-                        text: heading, // Add heading as prefix
-                    },
-                    {
-                        type: "paragraph",
-                        content: [{ type: "text", text: text }],
-                    },
-                ],
-            };
-        }
-    }
-
-    return {
-        type: "doc",
-        content: Object.entries(notesSummary[0]).map(([heading, text]) =>
-            generateParagraph(heading, text)
-        ),
-    };
-}
-
-import type { TodoTopic } from "@/";
 import { useEffect } from "react";
 
 type TiptapProps = {
-    rawContent: TodoTopic[] | any;
+    rawContent: any;
+    setRawContent: React.Dispatch<React.SetStateAction<any>>;
     type: "todoList" | "outline";
     setFilteredIssues?: React.Dispatch<React.SetStateAction<Array<string>>>;
 };
 
-export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
+export function Tiptap({
+    rawContent,
+    type,
+    setRawContent,
+    setFilteredIssues,
+}: TiptapProps) {
     let extensions = [
         StarterKit.configure({
             bulletList: {
@@ -142,6 +45,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
                 class: "flex items-start gap-2 pl-1",
             },
         }),
+        CustomHeading,
     ];
 
     if (type === "todoList") {
@@ -152,16 +56,13 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
         );
     }
 
-    const parsedContent =
-        rawContent.length > 0
-            ? type === "todoList"
-                ? generateTodoListJSON(rawContent)
-                : generateOutlineJSON(rawContent)
-            : "";
-
     const editor = useEditor({
         extensions: extensions,
-        content: parsedContent,
+        content: rawContent,
+        onUpdate: ({ editor }) => {
+            const jsonContent = editor.getJSON();
+            setRawContent(jsonContent);
+        },
         editorProps: {
             attributes: {
                 class: "min-h-[250px] p-4 focus:outline-none text-sm",
@@ -171,13 +72,7 @@ export function Tiptap({ rawContent, type, setFilteredIssues }: TiptapProps) {
 
     useEffect(() => {
         if (editor) {
-            const newContent =
-                rawContent.length > 0
-                    ? type === "todoList"
-                        ? generateTodoListJSON(rawContent)
-                        : generateOutlineJSON(rawContent)
-                    : "";
-            editor.commands.setContent(newContent);
+            editor.commands.setContent(rawContent);
         }
     }, [rawContent, editor]);
 
