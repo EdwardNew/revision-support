@@ -268,7 +268,7 @@ export default function PanelManager() {
 
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/outline`, {
             method: "PATCH",
-            body: JSON.stringify(outline),
+            body: outline,
         });
     }
 
