@@ -111,6 +111,11 @@ export default function PanelManager() {
                 setReviews(data.items.reviews);
                 setIssuesId(data.items.issues_id);
                 setRebuttalId(data.items.rebuttal_id);
+                fetch(data.items.pdf)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                        setPaperPdfUrl(URL.createObjectURL(blob));
+                    });
             });
     }, []);
 
@@ -395,10 +400,10 @@ export default function PanelManager() {
     //     setCurrentComments(currentIssue?.discussion);
     // }, [currentIssue]);
 
-    const [showPDF, setShowPDF] = useState<boolean>(true);
+    const [showPDF, setShowPDF] = useState<boolean>(false);
     const [showReviews, setShowReviews] = useState<boolean>(true);
     const [showNotes, setShowNotes] = useState<boolean>(true);
-    const [showRebuttal, setShowRebuttal] = useState<boolean>(false);
+    const [showRebuttal, setShowRebuttal] = useState<boolean>(true);
     const panelActiveClass = "bg-slate-200";
 
     const { username, treatment } = useContext(UserContext);
