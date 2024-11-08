@@ -214,7 +214,7 @@ export function IssueCard({ issue, issuesId, setAllIssues }: IssueCardProps) {
                                                     return prevIssue;
                                                 });
                                             fetch(
-                                                `${BASE_URL}/issues/${issuesId}?id=${issue._id}`,
+                                                `${BASE_URL}/issues/${issuesId}/${issue._id}`,
                                                 {
                                                     method: "PATCH",
                                                     body: JSON.stringify(

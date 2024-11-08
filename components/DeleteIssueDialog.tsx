@@ -32,7 +32,7 @@ export function DeleteIssueDialog({
             const updatedNotes = [...prevNotes].filter(
                 (note) => note._id !== noteId
             );
-            fetch(`${BASE_URL}/issues/${issuesId}?id=${noteId}`, {
+            fetch(`${BASE_URL}/issues/${issuesId}/${noteId}`, {
                 method: "DELETE",
             });
             return updatedNotes;
