@@ -105,7 +105,6 @@ export async function PATCH(
 ) {
     try {
         const issue_id = params.id;
-        console.log("issueId:", issue_id, ObjectId.isValid(issue_id));
         if (!ObjectId.isValid(issue_id)) {
             return NextResponse.json(
                 { message: "Invalid Issue ID format" },
@@ -113,6 +112,8 @@ export async function PATCH(
             );
         }
         const note_id = req.nextUrl.searchParams.get("id");
+
+        console.log("issueId:", issue_id, "noteId", note_id);
         if (!note_id || !ObjectId.isValid(note_id)) {
             return NextResponse.json(
                 { message: "Invalid note ID format" },
