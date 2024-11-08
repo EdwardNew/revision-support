@@ -187,8 +187,8 @@ export function IssueCard({ issue, issuesId, setAllIssues }: IssueCardProps) {
                                     className=" text-muted-foreground"
                                     onClick={(e) => {
                                         e.stopPropagation();
-
                                         setShowEdit(false);
+                                        setNewComment(issue.comment);
                                     }}
                                 >
                                     <CrossCircledIcon className="w-6 h-6" />
