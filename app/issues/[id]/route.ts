@@ -105,6 +105,7 @@ export async function PATCH(
 ) {
     try {
         const issue_id = params.id;
+        console.log("issueId:", issue_id, ObjectId.isValid(issue_id));
         if (!ObjectId.isValid(issue_id)) {
             return NextResponse.json(
                 { message: "Invalid Issue ID format" },
