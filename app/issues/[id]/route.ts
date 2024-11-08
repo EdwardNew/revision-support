@@ -111,7 +111,8 @@ export async function PATCH(
                 { status: 400 }
             );
         }
-        const note_id = req.nextUrl.searchParams.get("id");
+        const { searchParams } = new URL(req.url);
+        const note_id = searchParams.get("id");
 
         console.log("issueId:", issue_id, "noteId", note_id);
         if (!note_id || !ObjectId.isValid(note_id)) {
