@@ -196,25 +196,41 @@ export async function POST(req: Request) {
     const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: prompt,
-        // stream: true,
+        stream: true,
     });
 
-    const completion = response.choices[0]?.message?.content;
+    // const completion = response.choices[0]?.message?.content;
 
-    // const responseStream = new ReadableStream({
-    //     async start(controller) {
-    //         for await (const chunk of stream) {
-    //             const content = chunk.choices[0]?.delta?.content || "";
-    //             controller.enqueue(content);
-    //         }
-    //         controller.close();
-    //     },
-    // });
+    let buffer = "";
+
+    const responseStream = new ReadableStream({
+        async start(controller) {
+            for await (const chunk of response) {
+                const chunkContent = chunk.choices[0]?.delta?.content || "";
+                buffer += chunkContent;
+            }
+            const completeResponse = JSON.parse(buffer);
+
+            console.log(completeResponse);
+
+            controller.enqueue(
+                new TextEncoder().encode(JSON.stringify(completeResponse))
+            );
+            controller.close();
+        },
+    });
+
+    console.log("test", responseStream);
+
+    return new NextResponse(responseStream, {
+        headers: { "Content-Type": "application/json" },
+    });
 
     // return new NextResponse(responseStream, {
     //     headers: { "Content-Type": "text/event-stream" },
     // });
-    return NextResponse.json(completion);
+
+    return NextResponse.json(buffer);
 }
 
 export async function GET(req: Request) {

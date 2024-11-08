@@ -221,14 +221,13 @@ export default function PanelManager() {
 
         const summary = await response.json();
 
-        console.log(summary);
-
-        setTodoList(JSON.parse(summary));
+        setTodoList(summary);
+        // setTodoList(JSON.parse(summary));
         setLoadingTodoList(false);
 
         fetch(`${BASE_URL}/rebuttals/${rebuttalId}/todos`, {
             method: "PATCH",
-            body: summary,
+            body: JSON.stringify(summary),
         });
     }
 
