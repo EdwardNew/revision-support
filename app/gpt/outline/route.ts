@@ -260,7 +260,8 @@ export async function POST(req: Request) {
         },
         {
             role: "user",
-            content: `Make sure to only include JSON and text in your response.\
+            content: `Return only the valid JSON without any additional explanation, \
+            text, or formatting. The output should be directly parsable by JSON.parse().\
             Do NOT include any formatting or references to ids. Your response \
             should look something like this: ${responseFormat}`,
         },
