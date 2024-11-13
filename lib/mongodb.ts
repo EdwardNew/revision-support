@@ -49,7 +49,7 @@ interface PapersDoc {
     title: string;
     abstract: string;
     pdf: string;
-    paper_id: string;
+    paper_id: string | null;
     reviews: Array<Object>;
 }
 

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { papersCollection } from "@/lib/mongodb";
+import {
+    issuesCollection,
+    papersCollection,
+    rebuttalsCollection,
+} from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function GET(req: NextRequest) {
     try {
@@ -17,12 +22,56 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const result = await papersCollection.insertOne(body);
 
-        return NextResponse.json({ message: "Item created", result });
+        // create new issue
+        const newEmptyIssue = {
+            notes: [],
+        };
+        const issueResult = await issuesCollection.insertOne(newEmptyIssue);
+        const issue_id = issueResult.insertedId;
+
+        //create new rebuttal
+        const newEmptyRebuttal = {
+            todos: [],
+            outline: [],
+        };
+        const rebuttalResult = await rebuttalsCollection.insertOne(
+            newEmptyRebuttal
+        );
+        const rebuttal_id = rebuttalResult.insertedId;
+
+        // create new paper and link issue and rebuttal
+        const newPaper = {
+            _id: new ObjectId(),
+            reviews: body.reviews || [],
+            abstract: body.abstract || "",
+            pdf: body.pdf || "",
+            title: body.title || "Untitled Paper",
+            issues_id: issue_id,
+            rebuttal_id: rebuttal_id,
+            paper_id: body.paper_id || null,
+        };
+        const paperResult = await papersCollection.insertOne(newPaper);
+
+        console.log("Documents created successfully:");
+        console.log(`Issue Id: ${issue_id}`);
+        console.log(`Rebuttal Id: ${rebuttal_id}`);
+        console.log(`Paper Id: ${paperResult.insertedId}`);
+
+        return new Response(
+            JSON.stringify({
+                message: "Documents created successfully",
+                issueId: issue_id,
+                rebuttalId: rebuttal_id,
+                paperId: paperResult.insertedId,
+            }),
+            { status: 201 }
+        );
     } catch (error) {
-        return NextResponse.json(
-            { message: "Failed to create item", error },
+        console.error("Error creating documents:", error);
+
+        return new Response(
+            JSON.stringify({ message: "Error creating documents", error }),
             { status: 500 }
         );
     }
